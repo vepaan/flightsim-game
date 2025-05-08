@@ -11,24 +11,15 @@ const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
     const waterResolution = 8
 
-    const [timeOfDay, setTimeOfDay] = useState(0)
+    const timeOfDay = useRef(0)
     
     const [sunIntensity, setSunIntensity] = useState(10)
-    const [sunPosition, setSunPosition] = useState<THREE.Vector3>(skyPosition(timeOfDay))
+    const [sunPosition, setSunPosition] = useState<THREE.Vector3>(skyPosition(timeOfDay.current))
 
     const ambientIntensity = 1
     const skyScale = 10000
     const toneExposure = 0.3
     const oceanMovement = 1 / 200
-
-    useEffect(() => {
-        setSunPosition(skyPosition(timeOfDay))
-
-        if (timeOfDay > 180 && timeOfDay <= 360) {
-            setSunIntensity(1);
-        }
-
-    }, [timeOfDay])
     
     useEffect(() => {
 
@@ -128,7 +119,7 @@ const Game: React.FC = () => {
 
         const uniforms = sky.material.uniforms
         uniforms['turbidity'].value = 4 // cloudiness of sunrays (no light chantge)
-        uniforms['rayleigh'].value = 1.2 // sky become sbluer when decreased (redder sunsets)
+        uniforms['rayleigh'].value = 1.0 // sky become sbluer when decreased (redder sunsets)
         uniforms['mieCoefficient'].value = 0.001 // bloom increase to make sky whiter
         uniforms['mieDirectionalG'].value = 0.8
         uniforms['sunPosition'].value.copy(sunPosition)
@@ -141,6 +132,11 @@ const Game: React.FC = () => {
 
             // animate water time
             water.material.uniforms['time'].value += oceanMovement
+
+            const sunPos = skyPosition(timeOfDay.current)
+            sunLight.position.copy(sunPos.clone())
+            uniforms['sunPosition'].value.copy(sunPos)
+            sunLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? 1 : 10
 
             controls.update()
             renderer.render(scene, camera)
@@ -182,12 +178,30 @@ const Game: React.FC = () => {
     })
 
     return (
-        <div 
-            ref={mountRef}
-            style={{
-                width: '100vw',
-                height: '100vh'}}
-         />
+        <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+            <div
+                ref={mountRef}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                }}
+            />
+            <input
+                type="range"
+                min={0}
+                max={360}
+                defaultValue={timeOfDay.current}
+                onInput={(e) => timeOfDay.current = Number(e.currentTarget.value)}
+                style={{
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '60%',
+                    zIndex: 10,
+                }}
+            />
+        </div>
     )
 }
 
