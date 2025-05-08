@@ -9,9 +9,12 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js'
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
-    const waterResolution = 64
+    const waterResolution = 16
     const sunIntensity = 10
     const ambientIntensity = 1
+    const sunPosition = getSunPosition(40)
+    const skyScale = 10000
+    const toneExposure = 0.3
     
     useEffect(() => {
 
@@ -23,7 +26,7 @@ const Game: React.FC = () => {
 
         // scene setup
         const scene = new THREE.Scene()
-        scene.background = new THREE.Color(0x000000)
+        scene.background = null
 
         // camera setup
         const camera = new THREE.PerspectiveCamera(
@@ -40,6 +43,9 @@ const Game: React.FC = () => {
         renderer.setSize(container.clientWidth, container.clientHeight)
         container.appendChild(renderer.domElement)
 
+        renderer.toneMapping = THREE.ACESFilmicToneMapping
+        renderer.toneMappingExposure = toneExposure
+
         // LIGHTING
         
         // ambient light
@@ -49,7 +55,7 @@ const Game: React.FC = () => {
         // sun setup
         const sunLight = new THREE.DirectionalLight(0xffffaa, sunIntensity)
         sunLight.castShadow = true
-        sunLight.position.set(100, 100, 100)
+        sunLight.position.copy(sunPosition.clone().multiplyScalar(10e2))
         scene.add(sunLight)
 
         // controls setup
@@ -92,7 +98,7 @@ const Game: React.FC = () => {
             waterNormals: waterNormals,
             sunDirection: sunLight.position.clone().normalize(),
             sunColor: 0xffffff,
-            waterColor: 0x001e0f,
+            waterColor: 0x3a9ad9,
             distortionScale: 3.7,
             fog: scene.fog !== undefined
         })
@@ -103,17 +109,15 @@ const Game: React.FC = () => {
         // sky setup
 
         const sky = new Sky()
-        sky.scale.setScalar(10)
+        sky.scale.setScalar(skyScale)
         scene.add(sky)
 
         const uniforms = sky.material.uniforms
-        uniforms['turbidity'].value = 10
-        uniforms['rayleigh'].value = 2
-        uniforms['mieCoefficient'].value = 0.005
+        uniforms['turbidity'].value = 4 // cloudiness of sunrays (no light chantge)
+        uniforms['rayleigh'].value = 1.2 // sky become sbluer when decreased (redder sunsets)
+        uniforms['mieCoefficient'].value = 0.001 // bloom increase to make sky whiter
         uniforms['mieDirectionalG'].value = 0.8
-
-        const sun = new THREE.Vector3(100, 100, 100) // same as sunLight
-        uniforms['sunPosition'].value.copy(sun)
+        uniforms['sunPosition'].value.copy(sunPosition)
 
 
         // rendering our scene
@@ -172,5 +176,18 @@ const Game: React.FC = () => {
          />
     )
 }
+
+function getSunPosition(timeOfDay: number): THREE.Vector3 {
+    const phi = THREE.MathUtils.degToRad(90 - 10) // altitude of sun above horizon
+    const theta = THREE.MathUtils.degToRad(timeOfDay) // azimuth (0 = east, 180 = west)
+    const distance = 1 // unit direction vector
+
+    return new THREE.Vector3(
+        distance * Math.cos(theta) * Math.sin(phi),
+        distance * Math.sin(theta) * Math.sin(phi),
+        distance * Math.cos(phi) + 1
+    )
+  }
+  
 
 export default Game
