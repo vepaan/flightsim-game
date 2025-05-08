@@ -9,7 +9,7 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js'
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
-    const waterResolution = 8
+    const waterResolution = 512
     const moonSize = 20
 
     const timeOfDay = useRef(0)
@@ -205,8 +205,9 @@ const Game: React.FC = () => {
             const sunPos = skyPosition(timeOfDay.current)
             sunLight.position.copy(sunPos.clone())
             uniforms['sunPosition'].value.copy(sunPos)
-            sunLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? sunIntensityFallback : sunIntensity
-            moonLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? moonIntensity : moonIntensityFallback
+            
+            sunLight.intensity = getIntensity(timeOfDay.current, sunIntensity, sunIntensityFallback, true)
+            moonLight.intensity = getIntensity(timeOfDay.current, moonIntensity, moonIntensityFallback, false)
 
             if (moonRef.current) {
                 const moonPos = sunPos.clone().multiplyScalar(-600) // close to the edge of sky
@@ -291,6 +292,16 @@ function skyPosition(timeOfDay: number): THREE.Vector3 {
         distance * Math.sin(theta) * Math.sin(phi),
         distance * Math.cos(phi) + 1
     )
+}
+
+// this function simulates irl intensity change not abrupt
+
+function getIntensity(time: number, max: number, min: number, isSun: boolean): number {
+    const angleOffset = (isSun) ? 0.25: 0.75
+    const t = (time % 360) / 360 // normalize time of day to [0,1]
+    // sun peaks at t=0.25 (90 degrees) and moon peaks at t=0.75 (270 degrees)
+    const daylight = Math.cos((t-angleOffset) * Math.PI * 2)
+    return THREE.MathUtils.clamp((daylight + 1) / 2, 0, 1) * (max - min) + min
 }
   
 
