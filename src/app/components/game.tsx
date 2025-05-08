@@ -15,6 +15,11 @@ const Game: React.FC = () => {
     const timeOfDay = useRef(0)
     
     const sunIntensity = 10
+    const moonIntensity = 5
+
+    const sunIntensityFallback = 1
+    const moonIntensityFallback = 1
+
     const sunPosition = skyPosition(timeOfDay.current)
 
     const moonRef = useRef<THREE.Sprite | null>(null)
@@ -78,7 +83,11 @@ const Game: React.FC = () => {
             blending: THREE.AdditiveBlending
         })
         const moon = new THREE.Sprite(moonMaterial)
+        const moonLight = new THREE.DirectionalLight(0x8899ff, moonIntensity)
+        moonLight.castShadow = false
+
         scene.add(moon)
+        scene.add(moonLight)
         moonRef.current = moon
         moon.scale.set(moonSize, moonSize, 1)
 
@@ -157,11 +166,13 @@ const Game: React.FC = () => {
             const sunPos = skyPosition(timeOfDay.current)
             sunLight.position.copy(sunPos.clone())
             uniforms['sunPosition'].value.copy(sunPos)
-            sunLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? 1 : 10
+            sunLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? sunIntensityFallback : sunIntensity
+            moonLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? moonIntensity : moonIntensityFallback
 
             if (moonRef.current) {
                 const moonPos = sunPos.clone().multiplyScalar(-600) // close to the edge of sky
                 moonRef.current.position.copy(camera.position.clone().add(moonPos))
+                moonLight.position.copy(camera.position.clone().add(moonPos))
             }
 
             controls.update()
