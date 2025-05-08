@@ -10,11 +10,14 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js'
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
     const waterResolution = 8
+    const moonSize = 20
 
     const timeOfDay = useRef(0)
     
-    const [sunIntensity, setSunIntensity] = useState(10)
-    const [sunPosition, setSunPosition] = useState<THREE.Vector3>(skyPosition(timeOfDay.current))
+    const sunIntensity = 10
+    const sunPosition = skyPosition(timeOfDay.current)
+
+    const moonRef = useRef<THREE.Sprite | null>(null)
 
     const ambientIntensity = 1
     const skyScale = 10000
@@ -54,16 +57,33 @@ const Game: React.FC = () => {
         // LIGHTING
         
         // ambient light
+
         const ambient = new THREE.AmbientLight(0xffffff, ambientIntensity)
         scene.add(ambient)
 
         // sun setup
+
         const sunLight = new THREE.DirectionalLight(0xffffaa, sunIntensity)
         sunLight.castShadow = true
         sunLight.position.copy(sunPosition.clone().multiplyScalar(10e2))
         scene.add(sunLight)
 
+        // moon setup
+
+        const moonTexture = new THREE.TextureLoader().load('/textures/moon.jpg')
+        const moonMaterial = new THREE.SpriteMaterial({ 
+            map: moonTexture, 
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending
+        })
+        const moon = new THREE.Sprite(moonMaterial)
+        scene.add(moon)
+        moonRef.current = moon
+        moon.scale.set(moonSize, moonSize, 1)
+
         // controls setup
+
         const controls = new OrbitControls(camera, renderer.domElement)
         controls.target.set(0, 0.6, 0)
         controls.enableZoom = true
@@ -72,6 +92,7 @@ const Game: React.FC = () => {
         controls.enablePan = true
 
         // terrain loader setup
+
         const loader = new GLTFLoader()
         loader.load(
             '/models/programmer.glb',
@@ -137,6 +158,11 @@ const Game: React.FC = () => {
             sunLight.position.copy(sunPos.clone())
             uniforms['sunPosition'].value.copy(sunPos)
             sunLight.intensity = timeOfDay.current > 180 && timeOfDay.current <= 360 ? 1 : 10
+
+            if (moonRef.current) {
+                const moonPos = sunPos.clone().multiplyScalar(-600) // close to the edge of sky
+                moonRef.current.position.copy(camera.position.clone().add(moonPos))
+            }
 
             controls.update()
             renderer.render(scene, camera)
