@@ -9,12 +9,26 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js'
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
-    const waterResolution = 16
-    const sunIntensity = 10
+    const waterResolution = 8
+
+    const [timeOfDay, setTimeOfDay] = useState(0)
+    
+    const [sunIntensity, setSunIntensity] = useState(10)
+    const [sunPosition, setSunPosition] = useState<THREE.Vector3>(skyPosition(timeOfDay))
+
     const ambientIntensity = 1
-    const sunPosition = getSunPosition(40)
     const skyScale = 10000
     const toneExposure = 0.3
+    const oceanMovement = 1 / 200
+
+    useEffect(() => {
+        setSunPosition(skyPosition(timeOfDay))
+
+        if (timeOfDay > 180 && timeOfDay <= 360) {
+            setSunIntensity(1);
+        }
+
+    }, [timeOfDay])
     
     useEffect(() => {
 
@@ -126,7 +140,7 @@ const Game: React.FC = () => {
             requestAnimationFrame(animate)
 
             // animate water time
-            water.material.uniforms['time'].value += 1.0 / 60.0
+            water.material.uniforms['time'].value += oceanMovement
 
             controls.update()
             renderer.render(scene, camera)
@@ -177,7 +191,7 @@ const Game: React.FC = () => {
     )
 }
 
-function getSunPosition(timeOfDay: number): THREE.Vector3 {
+function skyPosition(timeOfDay: number): THREE.Vector3 {
     const phi = THREE.MathUtils.degToRad(90 - 10) // altitude of sun above horizon
     const theta = THREE.MathUtils.degToRad(timeOfDay) // azimuth (0 = east, 180 = west)
     const distance = 1 // unit direction vector
@@ -187,7 +201,7 @@ function getSunPosition(timeOfDay: number): THREE.Vector3 {
         distance * Math.sin(theta) * Math.sin(phi),
         distance * Math.cos(phi) + 1
     )
-  }
+}
   
 
 export default Game
