@@ -70,7 +70,7 @@ const Game: React.FC = () => {
 
         // moon setup
 
-        const moonTexture = new THREE.TextureLoader().load('/textures/moon.jpg')
+        const moonTexture = new THREE.TextureLoader().load('/textures/moon.png')
         const moonMaterial = new THREE.SpriteMaterial({ 
             map: moonTexture, 
             transparent: true,
