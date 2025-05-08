@@ -28,6 +28,10 @@ const Game: React.FC = () => {
     const skyScale = 10000
     const toneExposure = 0.3
     const oceanMovement = 1 / 200
+
+    const terrainX = 1000
+    const terrainY = 1000
+    const terrainZ = 1000
     
     useEffect(() => {
 
@@ -91,6 +95,38 @@ const Game: React.FC = () => {
         moonRef.current = moon
         moon.scale.set(moonSize, moonSize, 1)
 
+        // stars steup
+
+        const starCount = 1000
+        const starGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+
+        for (let i = 0; i < starCount; i++) {
+            const x = THREE.MathUtils.randFloatSpread(2000);
+            const y = THREE.MathUtils.randFloatSpread(2000);
+            const z = THREE.MathUtils.randFloatSpread(2000);
+            
+            const safeX = Math.abs(x) < 1000 ? x + 100 * Math.sign(x || 1) : x;
+            const safeY = Math.abs(y) < 1000 ? y + 100 * Math.sign(y || 1) : y;
+            const safeZ = Math.abs(z) < 1000 ? z + 100 * Math.sign(z || 1) : z;
+            
+            starVertices.push(safeX, safeY, safeZ);
+        }
+
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+
+        const starMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 1,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+
         // controls setup
 
         const controls = new OrbitControls(camera, renderer.domElement)
@@ -125,7 +161,7 @@ const Game: React.FC = () => {
         const waterNormals = new THREE.TextureLoader().load('/textures/waternormals.jpg')
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping
 
-        const waterGeometry = new THREE.PlaneGeometry(1000, 1000)
+        const waterGeometry = new THREE.PlaneGeometry(terrainX, terrainY)
 
         const water = new Water(waterGeometry, {
             textureWidth: waterResolution,
@@ -162,6 +198,9 @@ const Game: React.FC = () => {
 
             // animate water time
             water.material.uniforms['time'].value += oceanMovement
+
+            // animate stars
+            stars.rotation.x += 0.0002;
 
             const sunPos = skyPosition(timeOfDay.current)
             sunLight.position.copy(sunPos.clone())
