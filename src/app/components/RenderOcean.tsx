@@ -8,8 +8,10 @@ const terrainY = 1000
 
 export function setupRenderOcean(
     scene: THREE.Scene,
-    primaryLight: THREE.DirectionalLight
+    primaryLightRef: { current: THREE.DirectionalLight}
 ) {
+    const primaryLight = primaryLightRef.current
+
     const waterNormals = new THREE.TextureLoader().load('/textures/waternormals.jpg')
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping
 
@@ -18,9 +20,9 @@ export function setupRenderOcean(
         textureWidth: waterResolution,
         textureHeight: waterResolution,
         waterNormals: waterNormals,
-        sunDirection: primaryLight.position.clone().multiplyScalar(10e2).normalize(),
-        sunColor: 0xffffff,
-        waterColor: 0x3a9ad9,
+        sunDirection: primaryLight.position.clone().multiplyScalar(primaryLight.intensity).normalize(),
+        sunColor: primaryLight.color,
+        waterColor: 0x1565C0,
         distortionScale: 3.7,
         fog: scene.fog !== undefined,
     })
@@ -29,6 +31,8 @@ export function setupRenderOcean(
     scene.add(water)
 
     return function updateOcean() {
+        const primaryLight = primaryLightRef.current
+        water.material.uniforms['sunDirection'].value.copy(primaryLight.position).multiplyScalar(primaryLight.intensity).normalize()
         water.material.uniforms['time'].value += waterMovement
     }
 }

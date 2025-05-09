@@ -39,9 +39,6 @@ const Game: React.FC = () => {
         controls.target.set(0, 0.6, 0)
         controls.enableDamping = true
 
-        const skySystem = setupRenderSky(scene, camera, timeOfDay)
-        const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
-
         const loader = new GLTFLoader()
         loader.load(
             '/models/programmer.glb',
@@ -59,6 +56,9 @@ const Game: React.FC = () => {
                 console.error('GLTF load error:', error.message)
             }
         )
+
+        const skySystem = setupRenderSky(scene, camera, timeOfDay)
+        const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
 
         const animate = () => {
             requestAnimationFrame(animate)

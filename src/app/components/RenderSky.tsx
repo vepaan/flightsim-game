@@ -23,6 +23,7 @@ export function setupRenderSky(
     camera: THREE.Camera,
     timeOfDayRef: React.RefObject<number>
 ) {
+    const primaryLight = { current: new THREE.DirectionalLight() }
 
     const sky = new Sky()
     sky.scale.setScalar(skyScale)
@@ -89,20 +90,15 @@ export function setupRenderSky(
 
         moon.position.copy(camera.position.clone().add(sunPos.clone().multiplyScalar(-moonDistance)))
         stars.rotation.x += 0.0002
-    }
 
-    const getPrimaryLight = (): THREE.DirectionalLight => {
-        const time = timeOfDayRef.current || 0
         const t = (time % 360) / 360
         const daylight = Math.cos((t - 0.25) * Math.PI * 2)
-        return daylight >= 0 ? sunLight : moonLight
+        primaryLight.current = daylight >= 0 ? sunLight: moonLight
     }
 
     return {
         updateSky,
-        get primaryLight() {
-            return getPrimaryLight()
-        }
+        primaryLight
     }
 }
 
