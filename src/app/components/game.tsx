@@ -46,9 +46,9 @@ const Game: React.FC = () => {
         RenderModel({
             scene: scene,
             loader: loader,
-            url: '/models/programmer.glb',
-            scale: 0.3,
-            position: new THREE.Vector3(0, 0, 0)
+            url: '/models/mig29.glb',
+            scale: 0.1,
+            position: new THREE.Vector3(0, 6, 0)
         }).then((m) => {coderRef.current = m})
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
