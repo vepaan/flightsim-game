@@ -7,10 +7,13 @@ const moonScale = 20
 
 // light
 const sunIntensity = 10
-const moonIntensity = 5
+const sunIntensityFallBack = 0
+
+const moonIntensity = 2
+const moonIntensityFallback = 0
+
 const ambientIntensity = 1
-const sunIntensityFallBack = 1
-const moonIntensityFallback = 1
+const ambientIntensityFallback = 1
 
 // quantity
 const starCount = 1000
@@ -91,6 +94,8 @@ export function setupRenderSky(
         moon.position.copy(camera.position.clone().add(sunPos.clone().multiplyScalar(-moonDistance)))
         stars.rotation.x += 0.0002
 
+        ambient.intensity = getIntensity(time, ambientIntensity, ambientIntensityFallback, true)
+
         const t = (time % 360) / 360
         const daylight = Math.cos((t - 0.25) * Math.PI * 2)
         primaryLight.current = daylight >= 0 ? sunLight: moonLight
@@ -118,8 +123,8 @@ function getSkyPosition(timeOfDay: number): THREE.Vector3 {
 
 // this function simulates irl intensity change not abrupt
 
-function getIntensity(time: number, max: number, min: number, isSun: boolean): number {
-    const angleOffset = (isSun) ? 0.25: 0.75
+function getIntensity(time: number, max: number, min: number, isDay: boolean): number {
+    const angleOffset = (isDay) ? 0.25: 0.75
     const t = (time % 360) / 360 // normalize time of day to [0,1]
     // sun peaks at t=0.25 (90 degrees) and moon peaks at t=0.75 (270 degrees)
     const daylight = Math.cos((t-angleOffset) * Math.PI * 2)
