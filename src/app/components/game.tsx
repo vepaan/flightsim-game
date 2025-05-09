@@ -56,7 +56,30 @@ const Game: React.FC = () => {
             const obj = transformControls.object
             if (obj) {
                 console.clear()
-                console.log(`Position: (${obj.position.x.toFixed(2)}, ${obj.position.y.toFixed(2)}, ${obj.position.z.toFixed(2)})`)
+
+                const pos = obj.position
+                const rot = obj.rotation
+                const scale = obj.scale
+
+                const toDeg = THREE.MathUtils.radToDeg
+
+                console.log(`Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`)
+                console.log(`Rotation (deg): (${toDeg(rot.x).toFixed(2)}, ${toDeg(rot.y).toFixed(2)}, ${toDeg(rot.z).toFixed(2)})`)
+                console.log(`Scale: (${scale.x.toFixed(2)}, ${scale.y.toFixed(2)}, ${scale.z.toFixed(2)})`)
+            }
+        })
+
+        window.addEventListener('keydown', (e: any) => {
+            switch (e.key.toLowerCase()) {
+                case 't':
+                    transformControls.setMode('translate')
+                    break
+                case 'r':
+                    transformControls.setMode('rotate')
+                    break
+                case 's':
+                    transformControls.setMode('scale')
+                    break
             }
         })
 
@@ -70,11 +93,11 @@ const Game: React.FC = () => {
             scene: scene,
             loader: loader,
             url: '/models/mig29.glb',
-            scale: 0.1,
-            position: new THREE.Vector3(0, 6, 0)
+            scale: 0.05,
+            position: new THREE.Vector3(30.49, 6.61, 49.27),
+            rotation: {x: -175.72, y: 79.67, z: 177.61}
         }).then((m) => {
             mig29Ref.current = m
-            transformControls.attach(m)
         })
 
         RenderModel({
@@ -82,10 +105,10 @@ const Game: React.FC = () => {
             loader: loader,
             url: '/models/aircraft_carrier.glb',
             scale: 0.1,
-            position: new THREE.Vector3(15, 10, 40)
+            position: new THREE.Vector3(28, -4, 11),
+            rotation: {x: 0, y: 0, z: 0}
         }).then((m) => {
             aircraftCarrierRef.current = m
-            transformControls.attach(m)
         })
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
