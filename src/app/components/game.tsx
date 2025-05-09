@@ -7,16 +7,13 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
-import { useRaycastDragControls } from './useRaycastDragControls'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 
 const toneExposure = 0.3
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
     const timeOfDay = useRef(0)
-
-    const draggableObjects = useRef<THREE.Object3D[]>([])
-    const dragControls = useRef<any>(null)
 
     const mig29Ref = useRef<THREE.Group | null>(null)
     const aircraftCarrierRef = useRef<THREE.Group | null>(null)
@@ -43,13 +40,27 @@ const Game: React.FC = () => {
         renderer.toneMapping = THREE.ACESFilmicToneMapping
         renderer.toneMappingExposure = toneExposure
 
-        const controls = new OrbitControls(camera, renderer.domElement)
-        controls.target.set(0, 0.6, 0)
-        controls.enableDamping = true
+        const orbitControls = new OrbitControls(camera, renderer.domElement)
+        orbitControls.target.set(0, 0.6, 0)
+        orbitControls.enableDamping = true
 
-        // raycaster setup
-        dragControls.current = useRaycastDragControls(renderer, camera, draggableObjects.current)
-        dragControls.current.enable()
+        // transform controls setup
+
+        const transformControls = new TransformControls(camera, renderer.domElement)
+        
+        // we need to disable orbitcontrols when transform controls are in play
+        transformControls.addEventListener('dragging-changed', (event: any) => {
+            orbitControls.enabled = !event.value
+        })
+        transformControls.addEventListener('objectChange', () => {
+            const obj = transformControls.object
+            if (obj) {
+                console.clear()
+                console.log(`Position: (${obj.position.x.toFixed(2)}, ${obj.position.y.toFixed(2)}, ${obj.position.z.toFixed(2)})`)
+            }
+        })
+
+        scene.add(transformControls.getHelper())
 
         // model loader
 
@@ -63,7 +74,7 @@ const Game: React.FC = () => {
             position: new THREE.Vector3(0, 6, 0)
         }).then((m) => {
             mig29Ref.current = m
-            draggableObjects.current.push(m)
+            transformControls.attach(m)
         })
 
         RenderModel({
@@ -74,6 +85,7 @@ const Game: React.FC = () => {
             position: new THREE.Vector3(15, 10, 40)
         }).then((m) => {
             aircraftCarrierRef.current = m
+            transformControls.attach(m)
         })
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
@@ -85,7 +97,8 @@ const Game: React.FC = () => {
             skySystem.updateSky()
             updateOcean()
             
-            controls.update()
+            orbitControls.update()
+            transformControls.update()
             renderer.render(scene, camera)
         }
         animate()
@@ -98,8 +111,7 @@ const Game: React.FC = () => {
 
         return () => {
             renderer.dispose()
-            controls.dispose()
-            dragControls.current.disable()
+            orbitControls.dispose()
             container.removeChild(renderer.domElement)
         }
     }, [])
