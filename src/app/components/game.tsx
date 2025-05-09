@@ -7,13 +7,19 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
+import { useRaycastDragControls } from './useRaycastDragControls'
 
 const toneExposure = 0.3
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
     const timeOfDay = useRef(0)
-    const coderRef = useRef<THREE.Group | null>(null)
+
+    const draggableObjects = useRef<THREE.Object3D[]>([])
+    const dragControls = useRef<any>(null)
+
+    const mig29Ref = useRef<THREE.Group | null>(null)
+    const aircraftCarrierRef = useRef<THREE.Group | null>(null)
 
     useEffect(() => {
         const container = mountRef.current
@@ -41,6 +47,12 @@ const Game: React.FC = () => {
         controls.target.set(0, 0.6, 0)
         controls.enableDamping = true
 
+        // raycaster setup
+        dragControls.current = useRaycastDragControls(renderer, camera, draggableObjects.current)
+        dragControls.current.enable()
+
+        // model loader
+
         const loader = new GLTFLoader()
 
         RenderModel({
@@ -49,7 +61,20 @@ const Game: React.FC = () => {
             url: '/models/mig29.glb',
             scale: 0.1,
             position: new THREE.Vector3(0, 6, 0)
-        }).then((m) => {coderRef.current = m})
+        }).then((m) => {
+            mig29Ref.current = m
+            draggableObjects.current.push(m)
+        })
+
+        RenderModel({
+            scene: scene,
+            loader: loader,
+            url: '/models/aircraft_carrier.glb',
+            scale: 0.1,
+            position: new THREE.Vector3(15, 10, 40)
+        }).then((m) => {
+            aircraftCarrierRef.current = m
+        })
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
         const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
@@ -74,6 +99,7 @@ const Game: React.FC = () => {
         return () => {
             renderer.dispose()
             controls.dispose()
+            dragControls.current.disable()
             container.removeChild(renderer.domElement)
         }
     }, [])
