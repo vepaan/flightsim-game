@@ -6,45 +6,54 @@ export interface RenderModelParams {
     url: string
     scale?: number
     position?: THREE.Vector3
-    rotation?: {x?: number; y?: number; z?: number}
+    rotation?: { x?: number; y?: number; z?: number } // in degrees
 }
 
-export function RenderModel({
-    scene,
-    loader,
-    url,
-    scale = 1,
-    position = new THREE.Vector3,
-    rotation = {x: 0, y:0, z: 0}
-}: RenderModelParams) : Promise<THREE.Group> {
+export class RenderModel {
 
-    return new Promise((resolve, reject) => {
-        loader.load(
+    public model!: THREE.Group
+
+    constructor(private params: RenderModelParams) {}
+
+    async load(): Promise<THREE.Group> {
+        const {
+            scene,
+            loader,
             url,
-            (gltf: any) => {
-                const model = gltf.scene
-                model.scale.setScalar(scale)
-                model.position.copy(position)
+            scale = 1,
+            position = new THREE.Vector3(),
+            rotation = { x: 0, y: 0, z: 0 }
+        } = this.params
 
-                const toRad = THREE.MathUtils.degToRad
-                model.rotation.set(
-                    toRad(rotation.x ?? 0),
-                    toRad(rotation.y ?? 0),
-                    toRad(rotation.z ?? 0)
-                )
+        return new Promise((resolve, reject) => {
+            loader.load(
+                url,
+                (gltf: any) => {
+                    const model = gltf.scene
+                    model.scale.setScalar(scale)
+                    model.position.copy(position)
 
-                scene.add(model)
-                resolve(model)
-            },
-            (event: ProgressEvent<EventTarget>) => {
-                const loaded = event.loaded
-                const total = event.total ?? loaded
-                console.log(`Model ${((loaded / total) * 100).toFixed(1)}% loaded`)
-            },
-            (error) => {
-                console.error('GLTF load error')
-                reject(error)
-            }
-        )
-    })
+                    const toRad = THREE.MathUtils.degToRad
+                    model.rotation.set(
+                        toRad(rotation.x ?? 0),
+                        toRad(rotation.y ?? 0),
+                        toRad(rotation.z ?? 0)
+                    )
+
+                    scene.add(model)
+                    this.model = model
+                    resolve(model)
+                },
+                (event: ProgressEvent<EventTarget>) => {
+                    const loaded = event.loaded
+                    const total = event.total ?? loaded
+                    console.log(`Model ${((loaded / total) * 100).toFixed(1)}% loaded`)
+                },
+                (error) => {
+                    console.error('GLTF load error')
+                    reject(error)
+                }
+            )
+        })
+    }
 }

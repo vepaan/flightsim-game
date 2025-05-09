@@ -31,7 +31,7 @@ const Game: React.FC = () => {
             0.1,
             1000   
         )
-        camera.position.set(0, 0.6, 2.8)
+        camera.position.set(33.37, 10.81, 66.12)
 
         const renderer = new THREE.WebGLRenderer({ antialias: true })
         renderer.setSize(container.clientWidth, container.clientHeight)
@@ -43,6 +43,11 @@ const Game: React.FC = () => {
         const orbitControls = new OrbitControls(camera, renderer.domElement)
         orbitControls.target.set(0, 0.6, 0)
         orbitControls.enableDamping = true
+
+        orbitControls.addEventListener('change', () => {
+            console.clear()
+            console.log(`Camera Position: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`)
+        })
 
         // transform controls setup
 
@@ -89,26 +94,30 @@ const Game: React.FC = () => {
 
         const loader = new GLTFLoader()
 
-        RenderModel({
+        const mig29 = new RenderModel({
             scene: scene,
             loader: loader,
             url: '/models/mig29.glb',
             scale: 0.05,
             position: new THREE.Vector3(30.49, 6.61, 49.27),
             rotation: {x: -175.72, y: 79.67, z: 177.61}
-        }).then((m) => {
-            mig29Ref.current = m
         })
 
-        RenderModel({
+        mig29.load().then((model) => {
+            mig29Ref.current = model
+        })
+
+        const aircraftCarrier = new RenderModel({
             scene: scene,
             loader: loader,
             url: '/models/aircraft_carrier.glb',
             scale: 0.1,
             position: new THREE.Vector3(28, -4, 11),
             rotation: {x: 0, y: 0, z: 0}
-        }).then((m) => {
-            aircraftCarrierRef.current = m
+        })
+        
+        aircraftCarrier.load().then((model) => {
+            aircraftCarrierRef.current = model
         })
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
