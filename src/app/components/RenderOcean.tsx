@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Water } from 'three/examples/jsm/objects/Water.js'
 
-const waterResolution = 8
+const waterResolution = 256
 const waterMovement = 1/200
 const terrainX = 1000
 const terrainY = 1000
@@ -12,7 +12,7 @@ export function setupRenderOcean(
 ) {
     const primaryLight = primaryLightRef.current
 
-    const waterNormals = new THREE.TextureLoader().load('/textures/waternormals.jpg')
+    const waterNormals = new THREE.TextureLoader().load('/textures/waternormals2.jpg')
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping
 
     const geometry = new THREE.PlaneGeometry(terrainX, terrainY)
