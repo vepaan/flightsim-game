@@ -1,0 +1,40 @@
+import * as THREE from 'three'
+
+export interface RenderModelParams {
+    scene: THREE.Scene
+    loader: THREE.Loader
+    url: string
+    scale?: number
+    position?: THREE.Vector3
+    }
+
+export function RenderModel({
+    scene,
+    loader,
+    url,
+    scale = 1,
+    position = new THREE.Vector3
+}: RenderModelParams) : Promise<THREE.Group> {
+
+    return new Promise((resolve, reject) => {
+        loader.load(
+            url,
+            (gltf: any) => {
+                const model = gltf.scene
+                model.scale.setScalar(scale)
+                model.position.copy(position)
+                scene.add(model)
+                resolve(model)
+            },
+            (event: ProgressEvent<EventTarget>) => {
+                const loaded = event.loaded
+                const total = event.total ?? loaded
+                console.log(`Model ${((loaded / total) * 100).toFixed(1)}% loaded`)
+            },
+            (error) => {
+                console.error('GLTF load error')
+                reject(error)
+            }
+        )
+    })
+}

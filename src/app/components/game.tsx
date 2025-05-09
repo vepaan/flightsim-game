@@ -6,12 +6,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
+import { RenderModel } from './RenderModel'
 
 const toneExposure = 0.3
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
     const timeOfDay = useRef(0)
+    const coderRef = useRef<THREE.Group | null>(null)
 
     useEffect(() => {
         const container = mountRef.current
@@ -40,22 +42,14 @@ const Game: React.FC = () => {
         controls.enableDamping = true
 
         const loader = new GLTFLoader()
-        loader.load(
-            '/models/programmer.glb',
-            (gltf: any) => {
-                const model = gltf.scene
-                model.scale.setScalar(0.13)
-                scene.add(model)
-            },
-            (event: ProgressEvent<EventTarget>) => {
-                const loaded = event.loaded
-                const total = event.total ?? loaded
-                console.log(`Model ${((loaded / total) * 100).toFixed(1)}% loaded`)
-            },
-            (error: ErrorEvent) => {
-                console.error('GLTF load error:', error.message)
-            }
-        )
+
+        RenderModel({
+            scene: scene,
+            loader: loader,
+            url: '/models/programmer.glb',
+            scale: 0.3,
+            position: new THREE.Vector3(0, 0, 0)
+        }).then((m) => {coderRef.current = m})
 
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
         const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)

@@ -69,7 +69,12 @@ export function setupRenderSky(
         starVertices.push(safeX, safeY, safeZ);
     }
     starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3))
-    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1, transparent: true, opacity: 0.8 })
+    const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff, 
+        size: 1, 
+        transparent: true, 
+        opacity: 0.8
+    })
     const stars = new THREE.Points(starGeometry, starMaterial)
     scene.add(stars)
 

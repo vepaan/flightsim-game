@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Water } from 'three/examples/jsm/objects/Water.js'
 
-const waterResolution = 256
+const waterResolution = 1024
 const waterMovement = 1/200
 const terrainX = 1000
 const terrainY = 1000
