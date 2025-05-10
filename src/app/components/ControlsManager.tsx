@@ -14,7 +14,6 @@ export class TransformControlManager {
         linkedOrbitControls?: { enabled: boolean }
     ) {
         this.controls = new TransformControls(camera, domElement)
-        scene.add(this.controls)
 
         scene.add(this.controls.getHelper())
 
