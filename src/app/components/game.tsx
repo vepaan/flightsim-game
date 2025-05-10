@@ -2,17 +2,17 @@
 
 import React, { useRef, useEffect } from 'react'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
 import { RenderPlane } from './RenderPlane'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import { OrbitControlsManager, TransformControlManager } from './ControlsManager'
 import { PlaneControls } from './PlaneControls'
 import { PlaneCameraRig } from './PlaneCameraRig'
 
 const toneExposure = 0.3
+const IS_DEV_MODE = true
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -25,9 +25,11 @@ const Game: React.FC = () => {
         const container = mountRef.current
         if (!container) return
 
+        // SCENE
         const scene = new THREE.Scene()
         scene.background = null
 
+        // CAMERA
         const camera = new THREE.PerspectiveCamera(
             50,
             container.clientWidth / container.clientHeight,
@@ -36,6 +38,7 @@ const Game: React.FC = () => {
         )
         camera.position.set(33.37, 10.81, 66.12)
 
+        // RENDERER
         const renderer = new THREE.WebGLRenderer({ antialias: true })
         renderer.setSize(container.clientWidth, container.clientHeight)
         container.appendChild(renderer.domElement)
@@ -43,60 +46,50 @@ const Game: React.FC = () => {
         renderer.toneMapping = THREE.ACESFilmicToneMapping
         renderer.toneMappingExposure = toneExposure
 
-        const orbitControls = new OrbitControls(camera, renderer.domElement)
-        orbitControls.target.set(0, 0.6, 0)
-        orbitControls.enableDamping = true
 
-        orbitControls.addEventListener('change', () => {
-            console.clear()
-            console.log(`Camera Position: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`)
-        })
 
-        // transform controls setup
+        // CONTROLS
+        let transformControls: any
+        let orbitControls: any
 
-        const transformControls = new TransformControls(camera, renderer.domElement)
+        if (IS_DEV_MODE) {
+            orbitControls = new OrbitControlsManager(
+                camera,
+                renderer.domElement
+            )
+
+            transformControls = new TransformControlManager(
+                camera,
+                renderer.domElement,
+                scene,
+                orbitControls.controls
+            )
+        }
+
         
-        // we need to disable orbitcontrols when transform controls are in play
-        transformControls.addEventListener('dragging-changed', (event: any) => {
-            orbitControls.enabled = !event.value
-        })
-        transformControls.addEventListener('objectChange', () => {
-            const obj = transformControls.object
-            if (obj) {
-                console.clear()
 
-                const pos = obj.position
-                const rot = obj.rotation
-                const scale = obj.scale
-
-                const toDeg = THREE.MathUtils.radToDeg
-
-                console.log(`Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`)
-                console.log(`Rotation (deg): (${toDeg(rot.x).toFixed(2)}, ${toDeg(rot.y).toFixed(2)}, ${toDeg(rot.z).toFixed(2)})`)
-                console.log(`Scale: (${scale.x.toFixed(2)}, ${scale.y.toFixed(2)}, ${scale.z.toFixed(2)})`)
-            }
-        })
-
-        window.addEventListener('keydown', (e: any) => {
-            switch (e.key.toLowerCase()) {
-                case 't':
-                    transformControls.setMode('translate')
-                    break
-                case 'r':
-                    transformControls.setMode('rotate')
-                    break
-                case 's':
-                    transformControls.setMode('scale')
-                    break
-            }
-        })
-
-        scene.add(transformControls.getHelper())
-
-        // model loader
-
+        // MODEL LOADER
         const loader = new GLTFLoader()
 
+
+
+        // AIRCRAFT CARRIER
+        const aircraftCarrier = new RenderModel({
+            scene: scene,
+            loader: loader,
+            url: '/models/aircraft_carrier.glb',
+            scale: 0.1,
+            position: new THREE.Vector3(28, -4, 11),
+            rotation: {x: 0, y: 0, z: 0}
+        })
+        
+        aircraftCarrier.load().then((model) => {
+            aircraftCarrierRef.current = model
+        })
+        
+
+        
+        // PLANE
         const mig29 = new RenderPlane({
             scene: scene,
             loader: loader,
@@ -117,27 +110,15 @@ const Game: React.FC = () => {
             mig29Ref.current = mig29.wrapper
         })
 
-        const aircraftCarrier = new RenderModel({
-            scene: scene,
-            loader: loader,
-            url: '/models/aircraft_carrier.glb',
-            scale: 0.1,
-            position: new THREE.Vector3(28, -4, 11),
-            rotation: {x: 0, y: 0, z: 0}
-        })
-        
-        aircraftCarrier.load().then((model) => {
-            aircraftCarrierRef.current = model
-        })
-
         // plane controls
-
         const planeControls = new PlaneControls({
             plane: mig29,
             camera: camera,
             domElement: container,
             scene: scene
         })
+
+        // plane cam
         const cameraRig = new PlaneCameraRig({
             plane: mig29,
             camera,
@@ -147,21 +128,29 @@ const Game: React.FC = () => {
         })
 
 
+
+        // ENVIRONMENT
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
         const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
 
+
+
+        // ANIMATION LOOP
         const animate = () => {
             requestAnimationFrame(animate)
 
             skySystem.updateSky()
             updateOcean()
-            
             mig29.updateVisuals()
-            planeControls.updateCameraFollow()
-            cameraRig.update()
 
-            //orbitControls.update()
-            //transformControls.update()
+            if (IS_DEV_MODE) {
+                orbitControls?.update()
+                transformControls?.update()
+            } else {
+                planeControls.updateCameraFollow()
+                cameraRig.update()
+            }
+            
             renderer.render(scene, camera)
         }
         animate()
