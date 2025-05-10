@@ -122,9 +122,11 @@ const Game: React.FC = () => {
         const cameraRig = new PlaneCameraRig({
             plane: mig29,
             camera,
-            domElement: container, // your canvas container div
-            radius: 5,              // or 1 for 1m sphere as you said
-            sensitivity: 0.003
+            domElement: container,
+            radius: 12,
+            sensitivity: 0.003,
+            theta: Math.PI / 2 - 0.17,
+            phi: Math.PI / 2 - 0.17,
         })
 
 

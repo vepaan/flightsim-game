@@ -9,6 +9,8 @@ export interface PlaneCameraRigParams {
     domElement: HTMLElement
     radius?: number // default to 5m
     sensitivity?: number
+    phi?: number
+    theta?: number
 }
 
 export class PlaneCameraRig {
@@ -17,8 +19,8 @@ export class PlaneCameraRig {
     private domElement: HTMLElement
     private radius: number
     private sensitivity: number
-    private theta = 0 // horizontal angle
-    private phi = Math.PI / 2 // vertical angle
+    private theta: number // horizontal angle
+    private phi: number // vertical angle
     private prevX = 0
     private prevY = 0
     private initialized = false
@@ -30,6 +32,10 @@ export class PlaneCameraRig {
         this.domElement = params.domElement
         this.radius = params.radius ?? 5
         this.sensitivity = params.sensitivity ?? 0.002
+
+        // this setups initial cam pos
+        this.phi = params.phi ?? 1.4
+        this.theta = params.theta ?? Math.PI + 0.2
 
         this.initMouseListeners()
         //this.initMouseTracking()
