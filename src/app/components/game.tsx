@@ -115,7 +115,11 @@ const Game: React.FC = () => {
             plane: mig29,
             camera: camera,
             domElement: container,
-            scene: scene
+            scene: scene,
+            camRadius: 12,
+            camSensitivity: 0.002,
+            camPhi: Math.PI / 2 - 0.17,
+            camTheta: Math.PI / 2 - 0.17
         })
 
 

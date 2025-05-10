@@ -9,6 +9,10 @@ export interface PlaneControlsParams {
     camera: THREE.Camera
     domElement: HTMLElement
     scene: THREE.Scene
+    camRadius: number
+    camSensitivity: number
+    camTheta: number
+    camPhi: number
 }
 
 export class PlaneControls {
@@ -30,10 +34,10 @@ export class PlaneControls {
             plane: this.plane,
             camera: this.camera,
             domElement: this.domElement,
-            radius: 12,
-            sensitivity: 0.002,
-            theta: Math.PI / 2 - 0.17,
-            phi: Math.PI / 2 - 0.17,
+            radius: params.camRadius,
+            sensitivity: params.camSensitivity,
+            theta: params.camTheta,
+            phi: params.camPhi
         })
 
         this.bindInput()
@@ -86,6 +90,7 @@ export class PlaneControls {
                 const deltaPitch = -dy * sensitivity
 
                 this.plane.applyRotation(deltaPitch, deltaYaw)
+                this.planeCamera.accumulateCameraRotation(dx, dy)
             }
             
         })
@@ -112,8 +117,12 @@ export class PlaneControls {
 
         this.camera.position.lerp(cameraPos, 0.1) // smooth follow
         this.camera.lookAt(worldPos)
-
-        this.planeCamera.update()
+        
+        if (this.planeCamera.isDraggingMouse()) {
+            this.planeCamera.update360Cam()
+        } else {
+            this.planeCamera.updatePlaneCam()
+        }
     }
 }
 

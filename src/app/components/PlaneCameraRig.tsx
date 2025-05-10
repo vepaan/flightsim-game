@@ -25,6 +25,17 @@ export class PlaneCameraRig {
     private prevY = 0
     private isDragging = false
 
+    private initialPhi: number
+    private initialTheta: number
+
+    private prevMouseX = 0
+    private prevMouseY = 0
+    private mouseInitialized = false
+
+    private accumulatedYaw = 0
+    private accumulatedPitch = 0
+
+
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
         this.camera = params.camera
@@ -35,6 +46,9 @@ export class PlaneCameraRig {
         // this setups initial cam pos
         this.phi = params.phi ?? 1.4
         this.theta = params.theta ?? Math.PI + 0.2
+
+        this.initialPhi = this.phi
+        this.initialTheta = this.theta
     }
 
     isDraggingMouse() {
@@ -89,7 +103,7 @@ export class PlaneCameraRig {
     //     })
     // }
 
-    public update() {
+    update360Cam() {
         const target = new THREE.Vector3()
         this.plane.wrapper.getWorldPosition(target)
 
@@ -105,4 +119,29 @@ export class PlaneCameraRig {
 
         this.camera.lookAt(target)
     }
+
+    updatePlaneCam() {
+        const phi = THREE.MathUtils.clamp(
+            this.initialPhi + this.accumulatedPitch,
+            0.1,
+            Math.PI - 0.1
+        )
+        const theta = this.initialTheta + this.accumulatedYaw
+
+        const target = new THREE.Vector3()
+        this.plane.wrapper.getWorldPosition(target)
+
+        const x = this.radius * Math.sin(phi) * Math.cos(theta)
+        const y = this.radius * Math.cos(phi)
+        const z = this.radius * Math.sin(phi) * Math.sin(theta)
+
+        this.camera.position.set(target.x + x, target.y + y, target.z + z)
+        this.camera.lookAt(target)
+    }
+
+    public accumulateCameraRotation(dx: number, dy: number) {
+        this.accumulatedYaw += dx * this.sensitivity
+        this.accumulatedPitch += -dy * this.sensitivity
+    }
+
 }
