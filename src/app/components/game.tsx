@@ -86,6 +86,12 @@ const Game: React.FC = () => {
                 case 's':
                     transformControls.setMode('scale')
                     break
+                case 'w':
+                    mig29.moveForward(10)
+                    break
+                case 'x':
+                    mig29.moveBackward(10)
+                    break
             }
         })
 
@@ -105,7 +111,13 @@ const Game: React.FC = () => {
         })
 
         mig29.load().then(() => {
+            mig29.setHitbox({
+                dimensions: { length: 1, width: 2, height: 0.3 },
+                position: { x: 30.5, y: 6.6, z: 49.2 },
+                rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
+            })
             mig29.lockHitbox()
+            mig29.toggleHitboxVisibility(false)
             mig29Ref.current = mig29.wrapper
         })
 
