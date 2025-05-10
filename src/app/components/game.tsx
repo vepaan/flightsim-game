@@ -12,7 +12,7 @@ import { PlaneControls } from './PlaneControls'
 import { PlaneCameraRig } from './PlaneCameraRig'
 
 const toneExposure = 0.3
-const IS_DEV_MODE = true
+const IS_DEV_MODE = false
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)

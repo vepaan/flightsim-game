@@ -19,6 +19,10 @@ export class PlaneCameraRig {
     private sensitivity: number
     private theta = 0 // horizontal angle
     private phi = Math.PI / 2 // vertical angle
+    private prevX = 0
+    private prevY = 0
+    private initialized = false
+    private isDragging = false
 
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
@@ -28,33 +32,50 @@ export class PlaneCameraRig {
         this.sensitivity = params.sensitivity ?? 0.002
 
         this.initMouseListeners()
+        //this.initMouseTracking()
     }
 
     private initMouseListeners() {
-        let isDragging = false
-        let prevX = 0
-        let prevY = 0
-
         this.domElement.addEventListener('mousedown', (e) => {
-            isDragging = true
-            prevX = e.clientX
-            prevY = e.clientY
+            this.isDragging = true
+            this.prevX = e.clientX
+            this.prevY = e.clientY
         })
 
         window.addEventListener('mouseup', () => {
-            isDragging = false
+            this.isDragging = false
         })
 
         window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return
-            const dx = e.clientX - prevX
-            const dy = e.clientY - prevY
-            prevX = e.clientX
-            prevY = e.clientY
+            if (!this.isDragging) return
+            const dx = e.clientX - this.prevX
+            const dy = e.clientY - this.prevY
+            this.prevX = e.clientX
+            this.prevY = e.clientY
 
             this.theta -= dx * this.sensitivity
             this.phi -= dy * this.sensitivity
             this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
+        })
+    }
+
+    private initMouseTracking() {
+        this.domElement.addEventListener('mousemove', (e) => {
+            if (!this.initialized) {
+                this.prevX = e.clientX
+                this.prevY = e.clientY
+                this.initialized = true
+                return
+            }
+
+            const dx = e.clientX - this.prevX
+            const dy = e.clientY - this.prevY
+            this.prevX = e.clientX
+            this.prevY = e.clientY
+
+            this.theta -= dx * this.sensitivity
+            this.phi -= dy * this.sensitivity
+            this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to prevent flipping
         })
     }
 
