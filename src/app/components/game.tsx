@@ -7,13 +7,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
+import { RenderPlane } from './RenderPlane'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 
 const toneExposure = 0.3
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
-    const timeOfDay = useRef(0)
+    const timeOfDay = useRef(90)
 
     const mig29Ref = useRef<THREE.Group | null>(null)
     const aircraftCarrierRef = useRef<THREE.Group | null>(null)
@@ -94,7 +95,7 @@ const Game: React.FC = () => {
 
         const loader = new GLTFLoader()
 
-        const mig29 = new RenderModel({
+        const mig29 = new RenderPlane({
             scene: scene,
             loader: loader,
             url: '/models/mig29.glb',
@@ -103,8 +104,9 @@ const Game: React.FC = () => {
             rotation: {x: -175.72, y: 79.67, z: 177.61}
         })
 
-        mig29.load().then((model) => {
-            mig29Ref.current = model
+        mig29.load().then(() => {
+            mig29.lockHitbox()
+            mig29Ref.current = mig29.wrapper
         })
 
         const aircraftCarrier = new RenderModel({
@@ -129,6 +131,8 @@ const Game: React.FC = () => {
             skySystem.updateSky()
             updateOcean()
             
+            mig29.updateVisuals()
+
             orbitControls.update()
             transformControls.update()
             renderer.render(scene, camera)
