@@ -9,6 +9,8 @@ import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
 import { RenderPlane } from './RenderPlane'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import { PlaneControls } from './PlaneControls'
+import { PlaneCameraRig } from './PlaneCameraRig'
 
 const toneExposure = 0.3
 
@@ -86,12 +88,6 @@ const Game: React.FC = () => {
                 case 's':
                     transformControls.setMode('scale')
                     break
-                case 'w':
-                    mig29.moveForward(10)
-                    break
-                case 'x':
-                    mig29.moveBackward(10)
-                    break
             }
         })
 
@@ -134,6 +130,23 @@ const Game: React.FC = () => {
             aircraftCarrierRef.current = model
         })
 
+        // plane controls
+
+        const planeControls = new PlaneControls({
+            plane: mig29,
+            camera: camera,
+            domElement: container,
+            scene: scene
+        })
+        const cameraRig = new PlaneCameraRig({
+            plane: mig29,
+            camera,
+            domElement: container, // your canvas container div
+            radius: 5,              // or 1 for 1m sphere as you said
+            sensitivity: 0.003
+        })
+
+
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
         const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
 
@@ -144,9 +157,11 @@ const Game: React.FC = () => {
             updateOcean()
             
             mig29.updateVisuals()
+            planeControls.updateCameraFollow()
+            cameraRig.update()
 
-            orbitControls.update()
-            transformControls.update()
+            //orbitControls.update()
+            //transformControls.update()
             renderer.render(scene, camera)
         }
         animate()
