@@ -2,6 +2,7 @@
 
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
+import { PlaneCameraRig } from './PlaneCameraRig'
 
 export interface PlaneControlsParams {
     plane: RenderPlane
@@ -17,11 +18,23 @@ export class PlaneControls {
     private scene: THREE.Scene
     private speed = 0.5
 
+    private planeCamera: PlaneCameraRig
+
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
         this.camera = params.camera
         this.domElement = params.domElement
         this.scene = params.scene
+
+        this.planeCamera = new PlaneCameraRig({
+            plane: this.plane,
+            camera: this.camera,
+            domElement: this.domElement,
+            radius: 12,
+            sensitivity: 0.002,
+            theta: Math.PI / 2 - 0.17,
+            phi: Math.PI / 2 - 0.17,
+        })
 
         this.bindInput()
     }
@@ -42,6 +55,39 @@ export class PlaneControls {
                     this.rotateYaw(-2)
                     break
             }
+        })
+
+        this.planeCamera.initMouseListeners()
+        this.controlNose()
+    }
+
+    private controlNose() {
+        // mouse input
+        let prevX = 0
+        let prevY = 0
+        let initialized = false
+
+        this.domElement.addEventListener('mousemove', (e) => {
+            if (!this.planeCamera.isDraggingMouse()) {
+                if (!initialized) {
+                    prevX = e.clientX
+                    prevY = e.clientY
+                    initialized = true
+                    return
+                }
+
+                const dx = e.clientX - prevX
+                const dy = e.clientY - prevY
+                prevX = e.clientX
+                prevY = e.clientY
+
+                const sensitivity = 0.002
+                const deltaYaw = dx * sensitivity
+                const deltaPitch = -dy * sensitivity
+
+                this.plane.applyRotation(deltaPitch, deltaYaw)
+            }
+            
         })
     }
 
@@ -66,6 +112,8 @@ export class PlaneControls {
 
         this.camera.position.lerp(cameraPos, 0.1) // smooth follow
         this.camera.lookAt(worldPos)
+
+        this.planeCamera.update()
     }
 }
 

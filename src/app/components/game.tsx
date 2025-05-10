@@ -118,18 +118,6 @@ const Game: React.FC = () => {
             scene: scene
         })
 
-        // plane cam
-        const cameraRig = new PlaneCameraRig({
-            plane: mig29,
-            camera,
-            domElement: container,
-            radius: 12,
-            sensitivity: 0.003,
-            theta: Math.PI / 2 - 0.17,
-            phi: Math.PI / 2 - 0.17,
-        })
-
-
 
         // ENVIRONMENT
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
@@ -143,14 +131,13 @@ const Game: React.FC = () => {
 
             skySystem.updateSky()
             updateOcean()
-            mig29.updateVisuals()
+            mig29.update()
 
             if (IS_DEV_MODE) {
                 orbitControls?.update()
                 transformControls?.update()
             } else {
                 planeControls.updateCameraFollow()
-                cameraRig.update()
             }
             
             renderer.render(scene, camera)

@@ -102,7 +102,7 @@ export class RenderPlane extends RenderModel {
         this.helper.update()
     }
 
-    updateVisuals() {
+    update() {
         this.helper.update()
     }
 
@@ -132,5 +132,10 @@ export class RenderPlane extends RenderModel {
         })
 
         this.helper.visible = this.hitboxConfigured
+    }
+
+    applyRotation(deltaPitch: number, deltaYaw: number) {
+        this.wrapper.rotation.x += deltaPitch
+        this.wrapper.rotation.y += deltaYaw
     }
 }

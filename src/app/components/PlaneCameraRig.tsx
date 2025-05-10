@@ -23,7 +23,6 @@ export class PlaneCameraRig {
     private phi: number // vertical angle
     private prevX = 0
     private prevY = 0
-    private initialized = false
     private isDragging = false
 
     constructor(params: PlaneCameraRigParams) {
@@ -36,17 +35,22 @@ export class PlaneCameraRig {
         // this setups initial cam pos
         this.phi = params.phi ?? 1.4
         this.theta = params.theta ?? Math.PI + 0.2
-
-        this.initMouseListeners()
-        //this.initMouseTracking()
     }
 
-    private initMouseListeners() {
+    isDraggingMouse() {
+        return this.isDragging
+    }
+
+    initMouseListeners() {
         this.domElement.addEventListener('mousedown', (e) => {
-            this.isDragging = true
-            this.prevX = e.clientX
-            this.prevY = e.clientY
+            if (e.button == 2) {
+                this.isDragging = true
+                this.prevX = e.clientX
+                this.prevY = e.clientY
+            }
         })
+
+        this.domElement.addEventListener('contextmenu', (e) => e.preventDefault())
 
         window.addEventListener('mouseup', () => {
             this.isDragging = false
@@ -65,25 +69,25 @@ export class PlaneCameraRig {
         })
     }
 
-    private initMouseTracking() {
-        this.domElement.addEventListener('mousemove', (e) => {
-            if (!this.initialized) {
-                this.prevX = e.clientX
-                this.prevY = e.clientY
-                this.initialized = true
-                return
-            }
+    // initMouseTracking() {
+    //     this.domElement.addEventListener('mousemove', (e) => {
+    //         if (!this.initialized) {
+    //             this.prevX = e.clientX
+    //             this.prevY = e.clientY
+    //             this.initialized = true
+    //             return
+    //         }
 
-            const dx = e.clientX - this.prevX
-            const dy = e.clientY - this.prevY
-            this.prevX = e.clientX
-            this.prevY = e.clientY
+    //         const dx = e.clientX - this.prevX
+    //         const dy = e.clientY - this.prevY
+    //         this.prevX = e.clientX
+    //         this.prevY = e.clientY
 
-            this.theta -= dx * this.sensitivity
-            this.phi -= dy * this.sensitivity
-            this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to prevent flipping
-        })
-    }
+    //         this.theta -= dx * this.sensitivity
+    //         this.phi -= dy * this.sensitivity
+    //         this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to prevent flipping
+    //     })
+    // }
 
     public update() {
         const target = new THREE.Vector3()
