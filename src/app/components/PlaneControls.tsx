@@ -53,10 +53,10 @@ export class PlaneControls {
                     this.plane.moveBackward(this.speed)
                     break
                 case 'a':
-                    this.rotateYaw(2)
+                    this.rotateYaw(-2)
                     break
                 case 'd':
-                    this.rotateYaw(-2)
+                    this.rotateYaw(2)
                     break
             }
         })
@@ -72,38 +72,46 @@ export class PlaneControls {
         let initialized = false
 
         this.domElement.addEventListener('mousemove', (e) => {
-            if (!this.planeCamera.isDraggingMouse()) {
-                if (!initialized) {
-                    prevX = e.clientX
-                    prevY = e.clientY
-                    initialized = true
-                    return
-                }
+            if (this.planeCamera.isDraggingMouse()) return
 
-                const dx = e.clientX - prevX
-                const dy = e.clientY - prevY
+            if (!initialized) {
                 prevX = e.clientX
                 prevY = e.clientY
-
-                const sensitivity = 0.002
-                const deltaYaw = dx * sensitivity
-                const deltaPitch = -dy * sensitivity
-
-                this.plane.applyRotation(deltaPitch, deltaYaw)
-                this.planeCamera.accumulateCameraRotation(dx, dy)
+                initialized = true
+                return
             }
-            
-        })
+
+            const now = performance.now() / 1000
+            if (now - this.planeCamera.timeOf360CamStop < 0.15) return
+
+            const dx = e.clientX - prevX
+            const dy = e.clientY - prevY
+            prevX = e.clientX
+            prevY = e.clientY
+
+            const sensitivity = 0.002
+            const deltaYaw = dx * sensitivity
+            const deltaPitch = -dy * sensitivity
+
+            this.plane.applyRotation(deltaPitch, deltaYaw)
+            this.planeCamera.accumulateCameraRotation(dx, dy)
+        }
+        )
     }
 
     private rotateYaw(degrees: number) {
         const currentRot = this.plane.rotation
         const toRad = THREE.MathUtils.degToRad
+        const deltaYaw = toRad(degrees)
+
         this.plane.setOrientation(
             THREE.MathUtils.radToDeg(currentRot.x),
             THREE.MathUtils.radToDeg(currentRot.y + toRad(degrees)),
             THREE.MathUtils.radToDeg(currentRot.z)
         )
+        
+        const dx = deltaYaw / this.planeCamera.getSensitivity()
+        this.planeCamera.accumulateCameraRotation(dx, 0)
     }
 
     public updateCameraFollow(offset = new THREE.Vector3(-5, 2, 0)) {

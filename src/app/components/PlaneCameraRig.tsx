@@ -28,13 +28,10 @@ export class PlaneCameraRig {
     private initialPhi: number
     private initialTheta: number
 
-    private prevMouseX = 0
-    private prevMouseY = 0
-    private mouseInitialized = false
-
     private accumulatedYaw = 0
     private accumulatedPitch = 0
 
+    public timeOf360CamStop = 0
 
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
@@ -68,6 +65,7 @@ export class PlaneCameraRig {
 
         window.addEventListener('mouseup', () => {
             this.isDragging = false
+            this.timeOf360CamStop = performance.now() / 1000
         })
 
         window.addEventListener('mousemove', (e) => {
@@ -82,26 +80,6 @@ export class PlaneCameraRig {
             this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
         })
     }
-
-    // initMouseTracking() {
-    //     this.domElement.addEventListener('mousemove', (e) => {
-    //         if (!this.initialized) {
-    //             this.prevX = e.clientX
-    //             this.prevY = e.clientY
-    //             this.initialized = true
-    //             return
-    //         }
-
-    //         const dx = e.clientX - this.prevX
-    //         const dy = e.clientY - this.prevY
-    //         this.prevX = e.clientX
-    //         this.prevY = e.clientY
-
-    //         this.theta -= dx * this.sensitivity
-    //         this.phi -= dy * this.sensitivity
-    //         this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to prevent flipping
-    //     })
-    // }
 
     update360Cam() {
         const target = new THREE.Vector3()
@@ -139,9 +117,13 @@ export class PlaneCameraRig {
         this.camera.lookAt(target)
     }
 
-    public accumulateCameraRotation(dx: number, dy: number) {
+    accumulateCameraRotation(dx: number, dy: number) {
         this.accumulatedYaw += dx * this.sensitivity
         this.accumulatedPitch += -dy * this.sensitivity
+    }
+
+    getSensitivity() {
+        return this.sensitivity
     }
 
 }
