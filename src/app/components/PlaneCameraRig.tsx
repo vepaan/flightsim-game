@@ -70,24 +70,36 @@ export class PlaneCameraRig {
 
         window.addEventListener('mousemove', (e) => {
             if (!this.isDragging) return
+
             const dx = e.clientX - this.prevX
             const dy = e.clientY - this.prevY
             this.prevX = e.clientX
             this.prevY = e.clientY
 
-            this.theta -= dx * this.sensitivity
-            this.phi -= dy * this.sensitivity
+            this.accumulatedYaw += dx * this.sensitivity
+            this.accumulatedPitch += -dy * this.sensitivity
+
+            //this.theta -= dx * this.sensitivity
+            //this.phi -= dy * this.sensitivity
             this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
         })
     }
 
     update360Cam() {
+        const phi = THREE.MathUtils.clamp(
+            this.initialPhi + this.accumulatedPitch,
+            0,
+            Math.PI - 0
+        )
+
+        const theta = this.initialTheta + this.accumulatedYaw
+
         const target = new THREE.Vector3()
         this.plane.wrapper.getWorldPosition(target)
 
-        const x = this.radius * Math.sin(this.phi) * Math.cos(this.theta)
-        const y = this.radius * Math.cos(this.phi)
-        const z = this.radius * Math.sin(this.phi) * Math.sin(this.theta)
+        const x = this.radius * Math.sin(phi) * Math.cos(theta)
+        const y = this.radius * Math.cos(phi)
+        const z = this.radius * Math.sin(phi) * Math.sin(theta)
 
         this.camera.position.set(
             target.x + x,
@@ -101,8 +113,8 @@ export class PlaneCameraRig {
     updatePlaneCam() {
         const phi = THREE.MathUtils.clamp(
             this.initialPhi + this.accumulatedPitch,
-            0.1,
-            Math.PI - 0.1
+            0,
+            Math.PI - 0
         )
         const theta = this.initialTheta + this.accumulatedYaw
 
@@ -113,7 +125,12 @@ export class PlaneCameraRig {
         const y = this.radius * Math.cos(phi)
         const z = this.radius * Math.sin(phi) * Math.sin(theta)
 
-        this.camera.position.set(target.x + x, target.y + y, target.z + z)
+        this.camera.position.set(
+            target.x + x,
+            target.y + y, 
+            target.z + z
+        )
+
         this.camera.lookAt(target)
     }
 
