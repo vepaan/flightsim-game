@@ -71,7 +71,11 @@ export class PlaneControls {
         let prevY = 0
         let initialized = false
 
-        this.domElement.addEventListener('mousemove', (e) => {
+        window.addEventListener('mouseup', () => {
+            initialized = false //reset the nose controller 
+        })
+
+        window.addEventListener('mousemove', (e) => {
             if (this.planeCamera.isDraggingMouse()) return
 
             if (!initialized) {
@@ -81,19 +85,16 @@ export class PlaneControls {
                 return
             }
 
-            const now = performance.now() / 1000
-            if (now - this.planeCamera.timeOf360CamStop < 0.15) return
-
             const dx = e.clientX - prevX
             const dy = e.clientY - prevY
             prevX = e.clientX
             prevY = e.clientY
 
-            const sensitivity = 0.002
-            const deltaYaw = dx * sensitivity
-            const deltaPitch = -dy * sensitivity
+            const deltaYaw = dx * this.planeCamera.getSensitivity()
+            const deltaPitch = -dy * this.planeCamera.getSensitivity()
 
             this.plane.applyRotation(deltaPitch, deltaYaw)
+
             this.planeCamera.accumulateCameraRotation(dx, dy)
         }
         )

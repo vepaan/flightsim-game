@@ -31,7 +31,6 @@ export class PlaneCameraRig {
     private accumulatedYaw = 0
     private accumulatedPitch = 0
 
-    public timeOf360CamStop = 0
 
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
@@ -53,7 +52,7 @@ export class PlaneCameraRig {
     }
 
     initMouseListeners() {
-        this.domElement.addEventListener('mousedown', (e) => {
+        window.addEventListener('mousedown', (e) => {
             if (e.button == 2) {
                 this.isDragging = true
                 this.prevX = e.clientX
@@ -61,13 +60,16 @@ export class PlaneCameraRig {
             }
         })
 
-        this.domElement.addEventListener('contextmenu', (e) => e.preventDefault())
+        window.addEventListener('contextmenu', (e) => e.preventDefault())
 
         window.addEventListener('mouseup', () => {
             this.isDragging = false
-            this.timeOf360CamStop = performance.now() / 1000
+            // now i need to return cam to initial pos
+            this.accumulatedPitch = 0
+            this.accumulatedYaw = 0
         })
 
+        // for dragging 360 cam
         window.addEventListener('mousemove', (e) => {
             if (!this.isDragging) return
 
@@ -88,8 +90,8 @@ export class PlaneCameraRig {
     update360Cam() {
         const phi = THREE.MathUtils.clamp(
             this.initialPhi + this.accumulatedPitch,
-            0,
-            Math.PI - 0
+            0.1,
+            Math.PI - 0.1
         )
 
         const theta = this.initialTheta + this.accumulatedYaw
@@ -111,6 +113,7 @@ export class PlaneCameraRig {
     }
 
     updatePlaneCam() {
+        // clamp phi because this is vertical angle and can cause cam to flip
         const phi = THREE.MathUtils.clamp(
             this.initialPhi + this.accumulatedPitch,
             0,
@@ -127,7 +130,7 @@ export class PlaneCameraRig {
 
         this.camera.position.set(
             target.x + x,
-            target.y + y, 
+            target.y + y,
             target.z + z
         )
 
