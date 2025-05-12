@@ -9,7 +9,6 @@ import { RenderModel } from './RenderModel'
 import { RenderPlane } from './RenderPlane'
 import { OrbitControlsManager, TransformControlManager } from './ControlsManager'
 import { PlaneControls } from './PlaneControls'
-import { PlaneCameraRig } from './PlaneCameraRig'
 
 const toneExposure = 0.3
 const IS_DEV_MODE = false
@@ -106,9 +105,10 @@ const Game: React.FC = () => {
                 rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
             })
             mig29.lockHitbox()
-            mig29.toggleHitboxVisibility(false)
+            mig29.toggleHitboxVisibility(true)
             mig29Ref.current = mig29.wrapper
         })
+
 
         // plane controls
         const planeControls = new PlaneControls({
