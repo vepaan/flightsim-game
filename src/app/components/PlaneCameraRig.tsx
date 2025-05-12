@@ -70,9 +70,9 @@ export class PlaneCameraRig {
 
             const rot = this.plane.wrapper.rotation
 
-        // ✅ Correct orbit angles relative to current plane orientation
-        this.initialTheta = rot.y + Math.PI
-        this.initialPhi = Math.PI / 2 - rot.x + 0.17
+            // angles relative to current plane orientation
+            this.initialTheta = rot.y + Math.PI
+            this.initialPhi = Math.PI / 2 - rot.x + 0.17
             
         })
 
