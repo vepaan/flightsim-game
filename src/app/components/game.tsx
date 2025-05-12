@@ -116,7 +116,7 @@ const Game: React.FC = () => {
             camera: camera,
             domElement: container,
             camSensitivity: 0.002,
-            camDefaultOffset: new THREE.Vector3(-10, 2, 0)
+            camDefaultOffset: new THREE.Vector3(-20, 2, 0)
         })
 
 

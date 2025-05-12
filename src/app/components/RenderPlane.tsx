@@ -135,8 +135,16 @@ export class RenderPlane extends RenderModel {
     }
 
     applyRotation(deltaPitch: number, deltaYaw: number, deltaRoll: number) {
-        this.wrapper.rotation.x += deltaPitch
-        this.wrapper.rotation.y += deltaYaw
-        this.wrapper.rotation.z += deltaRoll
+        // Yaw around world up
+        this.wrapper.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), deltaYaw)
+
+        // Pitch around local right (Y points right when forward is +X)
+        this.wrapper.rotateOnAxis(new THREE.Vector3(0, 0, 1), deltaPitch)
+
+        // Roll around actual forward vector (+X)
+        const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(this.wrapper.quaternion)
+        this.wrapper.rotateOnAxis(forward.normalize(), deltaRoll)
+
+        this.helper.update()
     }
 }

@@ -105,7 +105,7 @@ export class PlaneControls {
 
     // FUNDAMENTAL AXES CONTROLS
 
-    private rotateAll(yaw: number, pitch: number, roll: number) {
+    private rotateAll(pitch: number, yaw: number, roll: number) {
         const currentRot = this.plane.rotation
         const toRad = THREE.MathUtils.degToRad
 
@@ -114,24 +114,24 @@ export class PlaneControls {
         const deltaRoll = toRad(roll)
 
         this.plane.setOrientation(
-            THREE.MathUtils.radToDeg(currentRot.x + deltaPitch),
+            THREE.MathUtils.radToDeg(currentRot.x + deltaRoll),
             THREE.MathUtils.radToDeg(currentRot.y + deltaYaw),
-            THREE.MathUtils.radToDeg(currentRot.z + deltaRoll)
+            THREE.MathUtils.radToDeg(currentRot.z + deltaPitch)
         )
 
         const dx = deltaYaw / this.planeCamera.getSensitivity()
-        const dy = deltaPitch / this.planeCamera.getSensitivity()
-        const dz = deltaRoll / this.planeCamera.getSensitivity()
+        const dy = deltaRoll / this.planeCamera.getSensitivity()
+        const dz = deltaPitch / this.planeCamera.getSensitivity()
 
         this.planeCamera.accumulateCameraRotation(dx, dy, dz)
     }
 
     private rotatePitch(degrees: number) {
-        this.rotateAll(0, degrees, 0)
+        this.rotateAll(degrees, 0, 0)
     }
 
     private rotateYaw(degrees: number) {
-        this.rotateAll(degrees, 0, 0)
+        this.rotateAll(0, degrees, 0)
     }
 
     private rotateRoll(degrees: number) {
