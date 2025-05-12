@@ -134,8 +134,9 @@ export class RenderPlane extends RenderModel {
         this.helper.visible = this.hitboxConfigured
     }
 
-    applyRotation(deltaPitch: number, deltaYaw: number) {
+    applyRotation(deltaPitch: number, deltaYaw: number, deltaRoll: number) {
         this.wrapper.rotation.x += deltaPitch
         this.wrapper.rotation.y += deltaYaw
+        this.wrapper.rotation.z += deltaRoll
     }
 }

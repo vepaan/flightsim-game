@@ -7,51 +7,42 @@ export interface PlaneCameraRigParams {
     plane: RenderPlane
     camera: THREE.Camera
     domElement: HTMLElement
-    radius?: number // default to 5m
     sensitivity?: number
-    phi?: number
-    theta?: number
+    defaultOffset: THREE.Vector3
 }
 
 export class PlaneCameraRig {
     private plane: RenderPlane
     private camera: THREE.Camera
     private domElement: HTMLElement
-    private radius: number
     private sensitivity: number
-    private theta: number // horizontal angle
-    private phi: number // vertical angle
+    
     private prevX = 0
     private prevY = 0
     private isDragging = false
 
-    private initialPhi: number
-    private initialTheta: number
-
     private accumulatedYaw = 0
     private accumulatedPitch = 0
+    private accumulatedRoll = 0
+
+    private defaultOffset: THREE.Vector3
 
 
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
         this.camera = params.camera
         this.domElement = params.domElement
-        this.radius = params.radius ?? 5
         this.sensitivity = params.sensitivity ?? 0.002
+        this.defaultOffset = params.defaultOffset
 
-        // this setups initial cam pos
-        this.phi = params.phi ?? 1.4
-        this.theta = params.theta ?? Math.PI + 0.2
-
-        this.initialPhi = this.phi
-        this.initialTheta = this.theta
+        this.initMouseListeners()
     }
 
     isDraggingMouse() {
         return this.isDragging
     }
 
-    initMouseListeners() {
+    private initMouseListeners() {
         window.addEventListener('mousedown', (e) => {
             if (e.button == 2) {
                 this.isDragging = true
@@ -67,13 +58,6 @@ export class PlaneCameraRig {
             // now i need to return cam to initial pos
             this.accumulatedPitch = 0
             this.accumulatedYaw = 0
-
-            const rot = this.plane.wrapper.rotation
-
-            // angles relative to current plane orientation
-            this.initialTheta = rot.y + Math.PI
-            this.initialPhi = Math.PI / 2 - rot.x + 0.17
-            
         })
 
         // for dragging 360 cam
@@ -94,52 +78,44 @@ export class PlaneCameraRig {
         })
     }
 
-    update360Cam() {
-        //const phi = THREE.MathUtils.clamp(this.initialPhi + this.accumulatedPitch, 0.1, Math.PI - 0.1)
-        const phi = this.initialPhi + this.accumulatedPitch
-        const theta = this.initialTheta + this.accumulatedYaw
+    updateCamera() {
+        const planePosition = new THREE.Vector3();
+        this.plane.wrapper.getWorldPosition(planePosition);
 
-        const target = new THREE.Vector3()
-        this.plane.wrapper.getWorldPosition(target)
+        const planeQuaternion = new THREE.Quaternion();
+        this.plane.wrapper.getWorldQuaternion(planeQuaternion);
 
-        const x = this.radius * Math.sin(phi) * Math.cos(theta)
-        const y = this.radius * Math.cos(phi)
-        const z = this.radius * Math.sin(phi) * Math.sin(theta)
+        // Apply accumulated yaw/pitch/roll for free-look
+        const yawQuaternion = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            this.accumulatedYaw
+        );
+        const pitchQuaternion = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(1, 0, 0),
+            this.accumulatedPitch
+        );
+        const rollQuaternion = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1),
+            this.accumulatedRoll
+        );
 
-        this.camera.position.set(
-            target.x + x,
-            target.y + y,
-            target.z + z
-        )
+        const combinedQuaternion = new THREE.Quaternion()
+            .copy(planeQuaternion)
+            .multiply(yawQuaternion)
+            .multiply(pitchQuaternion)
+            .multiply(rollQuaternion);
 
-        this.camera.lookAt(target)
+        // default offset instead of fixed radius
+        const offset = this.defaultOffset.clone().applyQuaternion(combinedQuaternion);
+
+        this.camera.position.copy(planePosition).add(offset);
+        this.camera.lookAt(planePosition);
     }
 
-    updatePlaneCam() {
-        // clamp phi because this is vertical angle and can cause cam to flip
-        //const phi = THREE.MathUtils.clamp(this.initialPhi + this.accumulatedPitch, 0, Math.PI - 0)
-        const phi = this.initialPhi + this.accumulatedPitch
-        const theta = this.initialTheta + this.accumulatedYaw
-
-        const target = new THREE.Vector3()
-        this.plane.wrapper.getWorldPosition(target)
-
-        const x = this.radius * Math.sin(phi) * Math.cos(theta)
-        const y = this.radius * Math.cos(phi)
-        const z = this.radius * Math.sin(phi) * Math.sin(theta)
-
-        this.camera.position.set(
-            target.x + x,
-            target.y + y,
-            target.z + z
-        )
-
-        this.camera.lookAt(target)
-    }
-
-    accumulateCameraRotation(dx: number, dy: number) {
+    accumulateCameraRotation(dx: number, dy: number, dz: number) {
         this.accumulatedYaw += dx * this.sensitivity
-        this.accumulatedPitch += -dy * this.sensitivity
+        this.accumulatedPitch += dy * this.sensitivity
+        this.accumulatedRoll += dz * this.sensitivity
     }
 
     getSensitivity() {
