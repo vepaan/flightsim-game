@@ -67,6 +67,13 @@ export class PlaneCameraRig {
             // now i need to return cam to initial pos
             this.accumulatedPitch = 0
             this.accumulatedYaw = 0
+
+            const rot = this.plane.wrapper.rotation
+
+        // ✅ Correct orbit angles relative to current plane orientation
+        this.initialTheta = rot.y + Math.PI
+        this.initialPhi = Math.PI / 2 - rot.x + 0.17
+            
         })
 
         // for dragging 360 cam
@@ -83,17 +90,13 @@ export class PlaneCameraRig {
 
             //this.theta -= dx * this.sensitivity
             //this.phi -= dy * this.sensitivity
-            this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
+            //this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
         })
     }
 
     update360Cam() {
-        const phi = THREE.MathUtils.clamp(
-            this.initialPhi + this.accumulatedPitch,
-            0.1,
-            Math.PI - 0.1
-        )
-
+        //const phi = THREE.MathUtils.clamp(this.initialPhi + this.accumulatedPitch, 0.1, Math.PI - 0.1)
+        const phi = this.initialPhi + this.accumulatedPitch
         const theta = this.initialTheta + this.accumulatedYaw
 
         const target = new THREE.Vector3()
@@ -114,11 +117,8 @@ export class PlaneCameraRig {
 
     updatePlaneCam() {
         // clamp phi because this is vertical angle and can cause cam to flip
-        const phi = THREE.MathUtils.clamp(
-            this.initialPhi + this.accumulatedPitch,
-            0,
-            Math.PI - 0
-        )
+        //const phi = THREE.MathUtils.clamp(this.initialPhi + this.accumulatedPitch, 0, Math.PI - 0)
+        const phi = this.initialPhi + this.accumulatedPitch
         const theta = this.initialTheta + this.accumulatedYaw
 
         const target = new THREE.Vector3()
