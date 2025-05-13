@@ -46,10 +46,10 @@ export class PlaneControls {
                     this.plane.moveBackward(this.speed)
                     break
                 case 'a':
-                    this.rotateRoll(-2)
+                    this.rotateYaw(-2)
                     break
                 case 'd':
-                    this.rotateRoll(2)
+                    this.rotateYaw(2)
                     break
 
                 case 'p':
@@ -92,12 +92,12 @@ export class PlaneControls {
             prevX = e.clientX
             prevY = e.clientY
 
-            const deltaYaw = dx * this.planeCamera.getSensitivity()
+            const deltaRoll = dx * this.planeCamera.getSensitivity()
             const deltaPitch = dy * this.planeCamera.getSensitivity()
-            const deltaRoll = 0
+            const deltaYaw = 0
 
             this.plane.applyRotation(deltaPitch, deltaYaw, deltaRoll)
-
+            
             this.planeCamera.updateCamera()
         }
         )
@@ -105,37 +105,22 @@ export class PlaneControls {
 
     // FUNDAMENTAL AXES CONTROLS
 
-    private rotateAll(pitch: number, yaw: number, roll: number) {
-        const currentRot = this.plane.rotation
-        const toRad = THREE.MathUtils.degToRad
-
-        const deltaYaw = toRad(yaw)
-        const deltaPitch = toRad(pitch)
-        const deltaRoll = toRad(roll)
-
-        this.plane.setOrientation(
-            THREE.MathUtils.radToDeg(currentRot.x + deltaRoll),
-            THREE.MathUtils.radToDeg(currentRot.y + deltaYaw),
-            THREE.MathUtils.radToDeg(currentRot.z + deltaPitch)
-        )
-
-        const dx = deltaYaw / this.planeCamera.getSensitivity()
-        const dy = deltaRoll / this.planeCamera.getSensitivity()
-        const dz = deltaPitch / this.planeCamera.getSensitivity()
-
-        this.planeCamera.accumulateCameraRotation(dx, dy, dz)
-    }
-
     private rotatePitch(degrees: number) {
-        this.rotateAll(degrees, 0, 0)
+        const delta = THREE.MathUtils.degToRad(degrees)
+        this.plane.applyRotation(delta, 0, 0) // pitch = x
+        this.planeCamera.accumulateCameraRotation(0, 0, delta)
     }
 
     private rotateYaw(degrees: number) {
-        this.rotateAll(0, degrees, 0)
+        const delta = THREE.MathUtils.degToRad(degrees)
+        this.plane.applyRotation(0, delta, 0) // yaw = y
+        this.planeCamera.accumulateCameraRotation(delta, 0, 0)
     }
 
     private rotateRoll(degrees: number) {
-        this.rotateAll(0, 0, degrees)
+        const delta = THREE.MathUtils.degToRad(degrees)
+        this.plane.applyRotation(0, 0, delta) // roll = z
+        this.planeCamera.accumulateCameraRotation(0, delta, 0)
     }
 
 
