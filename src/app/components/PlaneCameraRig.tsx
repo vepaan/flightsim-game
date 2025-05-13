@@ -2,6 +2,7 @@
 
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
+import { off } from 'process'
 
 export interface PlaneCameraRigParams {
     plane: RenderPlane
@@ -27,6 +28,8 @@ export class PlaneCameraRig {
 
     private defaultOffset: THREE.Vector3
 
+    private isFlipped: boolean
+
 
     constructor(params: PlaneCameraRigParams) {
         this.plane = params.plane
@@ -34,6 +37,7 @@ export class PlaneCameraRig {
         this.domElement = params.domElement
         this.sensitivity = params.sensitivity ?? 0.002
         this.defaultOffset = params.defaultOffset
+        this.isFlipped = false
 
         this.initMouseListeners()
     }
@@ -108,6 +112,10 @@ export class PlaneCameraRig {
         // default offset instead of fixed radius
         const offset = this.defaultOffset.clone().applyQuaternion(combinedQuaternion);
 
+        if (this.isFlipped) {
+            offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)
+        }
+
         this.camera.position.copy(planePosition).add(offset);
         this.camera.lookAt(planePosition);
     }
@@ -120,6 +128,10 @@ export class PlaneCameraRig {
 
     getSensitivity() {
         return this.sensitivity
+    }
+
+    flipCamera(f: boolean) {
+        this.isFlipped = f
     }
 
 }

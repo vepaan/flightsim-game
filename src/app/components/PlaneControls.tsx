@@ -48,10 +48,18 @@ export class PlaneControls {
     private bindInput() {
         window.addEventListener('keydown', (e) => {
             this.keysPressed.add(e.key.toLowerCase());
+
+            if(e.key.toLowerCase() == 'c') {
+                this.planeCamera.flipCamera(true)
+            }
         })
 
         window.addEventListener('keyup', (e) => {
             this.keysPressed.delete(e.key.toLowerCase())
+
+            if(e.key.toLowerCase() == 'c') {
+                this.planeCamera.flipCamera(false)
+            }
         })
 
         this.controlNose()
@@ -107,7 +115,6 @@ export class PlaneControls {
     }
 
 
-
     public updateCamera() {
         this.planeCamera.updateCamera()
     }
@@ -126,10 +133,6 @@ export class PlaneControls {
         if (this.keysPressed.has('s')) this.plane.moveBackward(move)
         if (this.keysPressed.has('a')) this.rotateYaw(1)
         if (this.keysPressed.has('d')) this.rotateYaw(-1)
-
-        if (this.keysPressed.has('p')) this.rotatePitch(2)
-        if (this.keysPressed.has('r')) this.rotateRoll(2)
-        if (this.keysPressed.has('y')) this.rotateYaw(2)
 
         this.updateCamera()
     }

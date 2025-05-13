@@ -105,7 +105,7 @@ const Game: React.FC = () => {
                 rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
             })
             mig29.lockHitbox()
-            mig29.toggleHitboxVisibility(true)
+            mig29.toggleHitboxVisibility(false)
             mig29Ref.current = mig29.wrapper
         })
 
