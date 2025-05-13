@@ -12,6 +12,11 @@ export interface PlaneControlsParams {
     camDefaultOffset: THREE.Vector3
 }
 
+class MouseDelta {
+    public dx: number = 0
+    public dy: number = 0
+}
+
 export class PlaneControls {
     private plane: RenderPlane
     private camera: THREE.Camera
@@ -19,6 +24,10 @@ export class PlaneControls {
     private speed = 0.5
 
     private planeCamera: PlaneCameraRig
+
+    private keysPressed = new Set<string>()
+
+    private mouseDelta = new MouseDelta()
 
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
@@ -38,30 +47,11 @@ export class PlaneControls {
 
     private bindInput() {
         window.addEventListener('keydown', (e) => {
-            switch (e.key.toLowerCase()) {
-                case 'w':
-                    this.plane.moveForward(this.speed)
-                    break
-                case 's':
-                    this.plane.moveBackward(this.speed)
-                    break
-                case 'a':
-                    this.rotateYaw(-2)
-                    break
-                case 'd':
-                    this.rotateYaw(2)
-                    break
+            this.keysPressed.add(e.key.toLowerCase());
+        })
 
-                case 'p':
-                    this.rotatePitch(2)
-                    break
-                case 'r':
-                    this.rotateRoll(2)
-                    break
-                case 'y':
-                    this.rotateYaw(2)
-                    break
-            }
+        window.addEventListener('keyup', (e) => {
+            this.keysPressed.delete(e.key.toLowerCase())
         })
 
         this.controlNose()
@@ -75,6 +65,8 @@ export class PlaneControls {
 
         window.addEventListener('mouseup', () => {
             initialized = false //reset the nose controller 
+            this.mouseDelta.dx = 0
+            this.mouseDelta.dy = 0
         })
 
         window.addEventListener('mousemove', (e) => {
@@ -87,20 +79,11 @@ export class PlaneControls {
                 return
             }
 
-            const dx = e.clientX - prevX
-            const dy = e.clientY - prevY
+            this.mouseDelta.dx = e.clientX - prevX
+            this.mouseDelta.dy = e.clientY - prevY
             prevX = e.clientX
             prevY = e.clientY
-
-            const deltaRoll = dx * this.planeCamera.getSensitivity()
-            const deltaPitch = dy * this.planeCamera.getSensitivity()
-            const deltaYaw = 0
-
-            this.plane.applyRotation(deltaPitch, deltaYaw, deltaRoll)
-            
-            this.planeCamera.updateCamera()
-        }
-        )
+        })
     }
 
     // FUNDAMENTAL AXES CONTROLS
@@ -125,8 +108,30 @@ export class PlaneControls {
 
 
 
-    public updateCameraFollow() {
+    public updateCamera() {
         this.planeCamera.updateCamera()
+    }
+
+    public tick() {
+        const move = this.speed
+        const sensitivity = this.planeCamera.getSensitivity()
+        const deltaRoll = this.mouseDelta.dx * sensitivity
+        const deltaPitch = this.mouseDelta.dy * sensitivity
+
+        if (!this.planeCamera.isDraggingMouse()) {
+            this.plane.applyRotation(deltaPitch, 0, deltaRoll)
+        }
+
+        if (this.keysPressed.has('w')) this.plane.moveForward(move)
+        if (this.keysPressed.has('s')) this.plane.moveBackward(move)
+        if (this.keysPressed.has('a')) this.rotateYaw(1)
+        if (this.keysPressed.has('d')) this.rotateYaw(-1)
+
+        if (this.keysPressed.has('p')) this.rotatePitch(2)
+        if (this.keysPressed.has('r')) this.rotateRoll(2)
+        if (this.keysPressed.has('y')) this.rotateYaw(2)
+
+        this.updateCamera()
     }
 }
 

@@ -111,7 +111,7 @@ const Game: React.FC = () => {
 
 
         // plane controls
-        const planeControls = new PlaneControls({
+        const mig29Controls = new PlaneControls({
             plane: mig29,
             camera: camera,
             domElement: container,
@@ -133,12 +133,13 @@ const Game: React.FC = () => {
             skySystem.updateSky()
             updateOcean()
             mig29.update()
+            mig29Controls.tick()
 
             if (IS_DEV_MODE) {
                 orbitControls?.update()
                 transformControls?.update()
             } else {
-                planeControls.updateCameraFollow()
+                mig29Controls.updateCamera()
             }
             
             renderer.render(scene, camera)
