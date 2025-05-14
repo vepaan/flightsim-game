@@ -15,7 +15,7 @@ export class RenderModel {
 
     public model!: THREE.Group
 
-    constructor(private params: RenderModelParams) {}
+    constructor(public params: RenderModelParams) {}
 
     async load(): Promise<THREE.Group> {
         const {
@@ -57,5 +57,42 @@ export class RenderModel {
                 }
             )
         })
+    }
+
+    unload() {
+        if (!this.model) return;
+
+        this.params.scene.remove(this.model);
+
+        // Dispose of geometries, materials, and textures
+        this.model.traverse((child) => {
+            if ((child as THREE.Mesh).geometry) {
+                (child as THREE.Mesh).geometry.dispose();
+            }
+
+            const material = (child as THREE.Mesh).material;
+            if (material) {
+                if (Array.isArray(material)) {
+                    material.forEach((mat) => {
+                        this.disposeMaterial(mat);
+                    });
+                } else {
+                    this.disposeMaterial(material);
+                }
+            }
+        });
+
+        this.model = undefined!;
+    }
+
+    disposeMaterial(material: THREE.Material) {
+        // Dispose textures
+        for (const key in material) {
+            const value = (material as any)[key];
+            if (value instanceof THREE.Texture) {
+                value.dispose();
+            }
+        }
+        material.dispose();
     }
 }

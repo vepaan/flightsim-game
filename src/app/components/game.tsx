@@ -18,6 +18,7 @@ const Game: React.FC = () => {
     const timeOfDay = useRef(90)
 
     const mig29Ref = useRef<THREE.Group | null>(null)
+    const f22Ref = useRef<THREE.Group | null>(null)
     const aircraftCarrierRef = useRef<THREE.Group | null>(null)
 
     useEffect(() => {
@@ -107,12 +108,34 @@ const Game: React.FC = () => {
             mig29.lockHitbox()
             mig29.toggleHitboxVisibility(false)
             mig29Ref.current = mig29.wrapper
+            mig29.unload()
+        })
+
+
+        const f22 = new RenderPlane({
+            scene: scene,
+            loader: loader,
+            url: '/models/f22.glb',
+            scale: 2.5,
+            position: new THREE.Vector3(30.49, 6.61, 49.27),
+            rotation: {x: -175.72, y: 79.67, z: 177.61}
+        })
+
+        f22.load().then(() => {
+            f22.setHitbox({
+                dimensions: { length: 1, width: 2, height: 0.3 },
+                position: { x: 30.5, y: 6.6, z: 49.2 },
+                rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
+            })
+            f22.lockHitbox()
+            f22.toggleHitboxVisibility(false)
+            f22Ref.current = f22.wrapper
         })
 
 
         // plane controls
         const mig29Controls = new PlaneControls({
-            plane: mig29,
+            plane: f22,
             camera: camera,
             domElement: container,
             camSensitivity: 0.002,
@@ -132,7 +155,7 @@ const Game: React.FC = () => {
 
             skySystem.updateSky()
             updateOcean()
-            mig29.update()
+            f22.update()
             mig29Controls.tick()
 
             if (IS_DEV_MODE) {

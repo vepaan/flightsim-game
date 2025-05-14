@@ -146,4 +146,45 @@ export class RenderPlane extends RenderModel {
 
         this.helper.update()
     }
+
+    unload() {
+        if (this.wrapper) {
+            this.params.scene.remove(this.wrapper);
+
+            this.wrapper.traverse((child) => {
+                if ((child as THREE.Mesh).geometry) {
+                    (child as THREE.Mesh).geometry.dispose();
+                }
+                const material = (child as THREE.Mesh).material;
+                if (material) {
+                    if (Array.isArray(material)) {
+                    material.forEach((mat) => this.disposeMaterial(mat));
+                    } else {
+                    this.disposeMaterial(material);
+                    }
+                }
+            });
+
+            this.wrapper = undefined!;
+            this.model = undefined!;
+
+        } else if (this.model) {
+            this.params.scene.remove(this.model);
+            this.model.traverse((child) => {
+                if ((child as THREE.Mesh).geometry) {
+                    (child as THREE.Mesh).geometry.dispose();
+                }
+                const material = (child as THREE.Mesh).material;
+                if (material) {
+                    if (Array.isArray(material)) {
+                    material.forEach((mat) => this.disposeMaterial(mat));
+                    } else {
+                    this.disposeMaterial(material);
+                    }
+                }
+            })
+            this.model = undefined!;
+        }
+    }
+
 }

@@ -2,7 +2,6 @@
 
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
-import { off } from 'process'
 
 export interface PlaneCameraRigParams {
     plane: RenderPlane
@@ -75,10 +74,6 @@ export class PlaneCameraRig {
 
             this.accumulatedYaw += dx * this.sensitivity
             this.accumulatedPitch += -dy * this.sensitivity
-
-            //this.theta -= dx * this.sensitivity
-            //this.phi -= dy * this.sensitivity
-            //this.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.phi)) // clamp to avoid flipping
         })
     }
 
