@@ -118,7 +118,7 @@ const Game: React.FC = () => {
             url: '/models/f22.glb',
             scale: 2.5,
             position: new THREE.Vector3(30.49, 6.61, 49.27),
-            rotation: {x: -175.72, y: 79.67, z: 177.61}
+            rotation: {x: -175.72, y: 79.67-90, z: 177.61+4}
         })
 
         f22.load().then(() => {

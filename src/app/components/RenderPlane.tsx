@@ -70,8 +70,8 @@ export class RenderPlane extends RenderModel {
         this.wrapper.parent?.attach(this.model)
         this.wrapper.attach(this.model)
 
-        this.model.position.set(0, 0, 0)
-        this.model.rotation.set(0, 0, 0)
+        //this.model.position.set(0, 0, 0)
+        //this.model.rotation.set(0, 0, 0)
         this.helper.update()
     }
 
