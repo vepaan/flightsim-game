@@ -47,6 +47,9 @@ const Game: React.FC = () => {
         renderer.toneMappingExposure = toneExposure
 
 
+        // GAME CLOCK
+        const clock = new THREE.Clock()
+
 
         // CONTROLS
         let transformControls: any
@@ -137,6 +140,7 @@ const Game: React.FC = () => {
         const mig29Controls = new PlaneControls({
             plane: f22,
             camera: camera,
+            clock: clock,
             domElement: container,
             camSensitivity: 0.002,
             camDefaultOffset: new THREE.Vector3(-20, 2, 0)
@@ -148,14 +152,15 @@ const Game: React.FC = () => {
         const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
 
 
-
         // ANIMATION LOOP
         const animate = () => {
             requestAnimationFrame(animate)
 
             skySystem.updateSky()
             updateOcean()
-            f22.update()
+
+            const delta = clock.getDelta()
+            f22.update(delta)
             mig29Controls.tick()
 
             if (IS_DEV_MODE) {

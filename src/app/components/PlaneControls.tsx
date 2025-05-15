@@ -7,6 +7,7 @@ import { PlaneCameraRig } from './PlaneCameraRig'
 export interface PlaneControlsParams {
     plane: RenderPlane
     camera: THREE.Camera
+    clock: THREE.Clock
     domElement: HTMLElement
     camSensitivity: number
     camDefaultOffset: THREE.Vector3
@@ -20,6 +21,7 @@ class MouseDelta {
 export class PlaneControls {
     private plane: RenderPlane
     private camera: THREE.Camera
+    private clock: THREE.Clock
     private domElement: HTMLElement
     private speed = 0.5
 
@@ -32,6 +34,7 @@ export class PlaneControls {
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
         this.camera = params.camera
+        this.clock = params.clock
         this.domElement = params.domElement
 
         this.planeCamera = new PlaneCameraRig({
@@ -133,6 +136,17 @@ export class PlaneControls {
         if (this.keysPressed.has('s')) this.plane.moveBackward(move)
         if (this.keysPressed.has('a')) this.rotateYaw(1)
         if (this.keysPressed.has('d')) this.rotateYaw(-1)
+
+        if (this.keysPressed.has('g')) {
+            if (!this.plane.mixer) return
+            const clipName = 'GEARDOWN'
+            this.plane.playAnimation(clipName, 10)
+            this.keysPressed.delete('g')
+        }
+
+        if (this.plane.mixer) {
+            this.plane.mixer.update(this.clock.getDelta())
+        }
 
         this.updateCamera()
     }

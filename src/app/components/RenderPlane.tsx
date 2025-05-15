@@ -102,8 +102,9 @@ export class RenderPlane extends RenderModel {
         this.helper.update()
     }
 
-    update() {
-        this.helper.update()
+    update(delta: number) {
+        this.mixer?.update(delta)
+        this.helper?.update()
     }
 
     get position() {

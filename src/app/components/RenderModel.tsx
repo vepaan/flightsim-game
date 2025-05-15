@@ -14,6 +14,8 @@ export interface RenderModelParams {
 export class RenderModel {
 
     public model!: THREE.Group
+    public mixer?: THREE.AnimationMixer
+    public animations: Record<string, THREE.AnimationClip> = {}
 
     constructor(public params: RenderModelParams) {}
 
@@ -41,6 +43,15 @@ export class RenderModel {
                         toRad(rotation.y ?? 0),
                         toRad(rotation.z ?? 0)
                     )
+
+                    const mixer = new THREE.AnimationMixer(model)
+
+                    this.model = model
+                    this.mixer = mixer
+                    
+                    gltf.animations.forEach((clip: THREE.AnimationClip) => {
+                        this.animations[clip.name] = clip
+                    })
 
                     scene.add(model)
                     this.model = model
@@ -94,5 +105,20 @@ export class RenderModel {
             }
         }
         material.dispose();
+    }
+
+    playAnimation(name: string, speed: number = 1) {
+        if (!this.mixer || !this.animations[name]) return
+
+        this.mixer.stopAllAction()
+        const action = this.mixer.clipAction(this.animations[name])
+
+        console.log('Available animations:', Object.keys(this.animations));
+        
+        action.setLoop(THREE.LoopOnce, 10)
+        action.clampWhenFinished = true
+        action.reset()
+        action.setEffectiveTimeScale(speed)
+        action.play()
     }
 }
