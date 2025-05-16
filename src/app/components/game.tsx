@@ -118,7 +118,7 @@ const Game: React.FC = () => {
         const f22 = new RenderPlane({
             scene: scene,
             loader: loader,
-            url: '/models/f22_1.glb',
+            url: '/models/f22.glb',
             scale: 2.5,
             position: new THREE.Vector3(30.49, 6.05, 49.27),
             rotation: {x: -180, y: 79.67-90, z: 177.61+4}

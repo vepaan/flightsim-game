@@ -124,6 +124,31 @@ export class PlaneControls {
         this.planeCamera.updateCamera()
     }
 
+    // PLANE ANIMATION CONTROL
+
+    public landingGear() {
+        const clip = this.plane.animations['GEARDOWN']
+        if (!this.plane.mixer || !clip) return
+
+        const action = this.plane.mixer.clipAction(clip)
+
+        action.setLoop(THREE.LoopOnce, 1)
+        action.clampWhenFinished = true;
+        action.reset()
+
+        if (this.landingGearDown) {
+            action.time = clip.duration
+            action.setEffectiveTimeScale(-10)
+        } else {
+            action.setEffectiveTimeScale(10)
+        }
+
+        action.play()
+        this.landingGearDown = !this.landingGearDown
+    }
+
+    // TICK/UPDATE FUNCTION
+
     public tick() {
         const move = this.speed
         const sensitivity = this.planeCamera.getSensitivity()
@@ -140,15 +165,7 @@ export class PlaneControls {
         if (this.keysPressed.has('d')) this.rotateYaw(-1)
 
         if (this.keysPressed.has('g')) {
-            if (!this.plane.mixer) return
-
-            if (this.landingGearDown) {
-                this.plane.playAnimation('GEARUP', 10)
-            } else {
-                this.plane.playAnimation('GEARDOWN', 10)
-            }
-
-            this.landingGearDown = !this.landingGearDown
+            this.landingGear()
             this.keysPressed.delete('g')
         }
 
