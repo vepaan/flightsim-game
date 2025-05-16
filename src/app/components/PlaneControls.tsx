@@ -31,6 +31,8 @@ export class PlaneControls {
 
     private mouseDelta = new MouseDelta()
 
+    private landingGearDown = true
+
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
         this.camera = params.camera
@@ -139,9 +141,20 @@ export class PlaneControls {
 
         if (this.keysPressed.has('g')) {
             if (!this.plane.mixer) return
-            const clipName = 'GEARDOWN'
-            this.plane.playAnimation(clipName, 10)
+
+            if (this.landingGearDown) {
+                this.plane.playAnimation('GEARUP', 10)
+            } else {
+                this.plane.playAnimation('GEARDOWN', 10)
+            }
+
+            this.landingGearDown = !this.landingGearDown
             this.keysPressed.delete('g')
+        }
+
+        if (this.keysPressed.has('x')) {
+            this.plane.playAnimation('WEAPONSBAYOPEN', 10)
+            this.keysPressed.delete('x')
         }
 
         if (this.plane.mixer) {

@@ -118,10 +118,10 @@ const Game: React.FC = () => {
         const f22 = new RenderPlane({
             scene: scene,
             loader: loader,
-            url: '/models/f22.glb',
+            url: '/models/f22_1.glb',
             scale: 2.5,
-            position: new THREE.Vector3(30.49, 6.61, 49.27),
-            rotation: {x: -175.72, y: 79.67-90, z: 177.61+4}
+            position: new THREE.Vector3(30.49, 6.05, 49.27),
+            rotation: {x: -180, y: 79.67-90, z: 177.61+4}
         })
 
         f22.load().then(() => {
@@ -160,13 +160,13 @@ const Game: React.FC = () => {
             updateOcean()
 
             const delta = clock.getDelta()
-            f22.update(delta)
-            mig29Controls.tick()
 
             if (IS_DEV_MODE) {
                 orbitControls?.update()
                 transformControls?.update()
             } else {
+                f22.update(delta)
+                mig29Controls.tick()
                 mig29Controls.updateCamera()
             }
             

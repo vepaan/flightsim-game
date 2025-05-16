@@ -30,6 +30,21 @@ export class RenderPlane extends RenderModel {
 
     async load(): Promise<THREE.Group> {
         this.model = await super.load()
+
+        // if not alr in geardown, make it geardown
+        if (this.mixer) {
+            const key = Object.keys(this.animations)
+                .find(n => n === 'GEARDOWN')
+            if (key) {
+                const clip = this.animations[key]
+                const action = this.mixer.clipAction(clip)
+                action.play()
+                action.time = clip.duration
+                this.mixer.update(0)
+                action.paused = true
+            }
+        }
+
         return this.model
     }
 
