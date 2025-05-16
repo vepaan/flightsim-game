@@ -3,6 +3,7 @@
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
 import { PlaneCameraRig } from './PlaneCameraRig'
+import { RSC_ACTION_CLIENT_WRAPPER_ALIAS } from 'next/dist/lib/constants'
 
 export interface PlaneControlsParams {
     plane: RenderPlane
@@ -32,6 +33,7 @@ export class PlaneControls {
     private mouseDelta = new MouseDelta()
 
     private landingGearDown = true
+    private weaponsBayDown = false
 
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
@@ -126,25 +128,42 @@ export class PlaneControls {
 
     // PLANE ANIMATION CONTROL
 
-    public landingGear() {
-        const clip = this.plane.animations['GEARDOWN']
-        if (!this.plane.mixer || !clip) return
+    // This is the bread and butter that allows me to play any animation when any other animation is configured
+    private playAnimationPart(
+        clipName: string,
+        speed: number,
+        reverse: boolean,
+    ) {
+        const mixer = this.plane.mixer
+        const clip = this.plane.animations[clipName]
+        if (!mixer || !clip) return
 
-        const action = this.plane.mixer.clipAction(clip)
+        const action = mixer.clipAction(clip)
 
-        action.setLoop(THREE.LoopOnce, 1)
-        action.clampWhenFinished = true;
+        action.stop()
         action.reset()
+        action.setLoop(THREE.LoopOnce, 1)
+        action.clampWhenFinished = true
 
-        if (this.landingGearDown) {
+        if (reverse) {
             action.time = clip.duration
-            action.setEffectiveTimeScale(-10)
+            action.setEffectiveTimeScale(-speed)
         } else {
-            action.setEffectiveTimeScale(10)
+            action.setEffectiveTimeScale(speed)
         }
 
         action.play()
+    }
+
+
+    public toggleLandingGear() {
+        this.playAnimationPart('Geardown', 10, this.landingGearDown)
         this.landingGearDown = !this.landingGearDown
+    }
+
+    public toggleWeaponsBay() {
+        this.playAnimationPart('Weapons', 10, this.weaponsBayDown)
+        this.weaponsBayDown = !this.weaponsBayDown
     }
 
     // TICK/UPDATE FUNCTION
@@ -164,16 +183,18 @@ export class PlaneControls {
         if (this.keysPressed.has('a')) this.rotateYaw(1)
         if (this.keysPressed.has('d')) this.rotateYaw(-1)
 
+
         if (this.keysPressed.has('g')) {
-            this.landingGear()
+            this.toggleLandingGear()
             this.keysPressed.delete('g')
         }
 
         if (this.keysPressed.has('x')) {
-            this.plane.playAnimation('WEAPONSBAYOPEN', 10)
+            this.toggleWeaponsBay()
             this.keysPressed.delete('x')
         }
 
+        
         if (this.plane.mixer) {
             this.plane.mixer.update(this.clock.getDelta())
         }

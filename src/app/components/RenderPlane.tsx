@@ -34,7 +34,7 @@ export class RenderPlane extends RenderModel {
         // if not alr in geardown, make it geardown
         if (this.mixer) {
             const key = Object.keys(this.animations)
-                .find(n => n === 'GEARDOWN')
+                .find(n => n.toLowerCase() === 'geardown')
             if (key) {
                 const clip = this.animations[key]
                 const action = this.mixer.clipAction(clip)
