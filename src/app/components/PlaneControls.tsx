@@ -3,12 +3,10 @@
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
 import { PlaneCameraRig } from './PlaneCameraRig'
-import { RSC_ACTION_CLIENT_WRAPPER_ALIAS } from 'next/dist/lib/constants'
 
 export interface PlaneControlsParams {
     plane: RenderPlane
     camera: THREE.Camera
-    clock: THREE.Clock
     domElement: HTMLElement
     camSensitivity: number
     camDefaultOffset: THREE.Vector3
@@ -20,9 +18,9 @@ class MouseDelta {
 }
 
 export class PlaneControls {
+
     private plane: RenderPlane
     private camera: THREE.Camera
-    private clock: THREE.Clock
     private domElement: HTMLElement
     private speed = 0.5
 
@@ -35,10 +33,18 @@ export class PlaneControls {
     private landingGearDown = true
     private weaponsBayDown = false
 
+    private pitchDir = 0
+    private flaps = 0
+    private lpitchup: THREE.AnimationAction | undefined
+    private lpitchdown: THREE.AnimationAction | undefined
+    private rpitchup: THREE.AnimationAction | undefined
+    private rpitchdown: THREE.AnimationAction | undefined
+    private pitchesSet = false
+    
+
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
         this.camera = params.camera
-        this.clock = params.clock
         this.domElement = params.domElement
 
         this.planeCamera = new PlaneCameraRig({
@@ -82,6 +88,7 @@ export class PlaneControls {
             initialized = false //reset the nose controller 
             this.mouseDelta.dx = 0
             this.mouseDelta.dy = 0
+            this.pitchDir = 0
         })
 
         window.addEventListener('mousemove', (e) => {
@@ -96,10 +103,16 @@ export class PlaneControls {
 
             this.mouseDelta.dx = e.clientX - prevX
             this.mouseDelta.dy = e.clientY - prevY
+
             prevX = e.clientX
             prevY = e.clientY
+
+            if (this.mouseDelta.dx < 0) this.pitchDir = 1
+            else if (this.mouseDelta.dx > 0) this.pitchDir = -1
+            else this.pitchDir = 0
         })
     }
+
 
     // FUNDAMENTAL AXES CONTROLS
 
@@ -137,8 +150,6 @@ export class PlaneControls {
         const mixer = this.plane.mixer
         const clip = this.plane.animations[clipName]
 
-        console.log(this.plane.animations)
-
         if (!mixer || !clip) return
 
         const action = mixer.clipAction(clip)
@@ -155,23 +166,69 @@ export class PlaneControls {
             action.setEffectiveTimeScale(speed)
         }
 
-        action.play()
+        return action
     }
 
 
-    public toggleLandingGear() {
-        this.playAnimationPart('Geardown', 6, this.landingGearDown)
+    private toggleLandingGear() {
+        this.playAnimationPart('Geardown', 1, this.landingGearDown)?.play()
         this.landingGearDown = !this.landingGearDown
     }
 
-    public toggleWeaponsBay() {
-        this.playAnimationPart('Weapons', 5, this.weaponsBayDown)
+    private toggleWeaponsBay() {
+        this.playAnimationPart('Weapons', 1, this.weaponsBayDown)?.play()
         this.weaponsBayDown = !this.weaponsBayDown
     }
 
+    private initPitch() {
+        if (this.pitchesSet) return
+        this.lpitchup = this.playAnimationPart('Lpitchup', 3, false)
+        this.lpitchdown = this.playAnimationPart('Lpitchdown', 3, false)
+        this.rpitchup = this.playAnimationPart('Rpitchup', 3, false)
+        this.rpitchdown = this.playAnimationPart('Rpitchdown', 3, false)
+        this.pitchesSet = true
+    }
+
+    private processPitch() {
+        this.initPitch()
+
+        if (this.pitchDir == 1) {
+
+            if (this.flaps == 0) {
+                
+            } else if (this.flaps == -1) {
+
+            } else if (this.flaps == 1) {
+
+            }
+            
+        
+        } else if (this.pitchDir == -1) {
+
+            if (this.flaps == 0) {
+                
+            } else if (this.flaps == -1) {
+
+            } else if (this.flaps == 1) {
+
+            }
+        
+        } else {
+
+            if (this.flaps == 0) {
+                
+            } else if (this.flaps == -1) {
+
+            } else if (this.flaps == 1) {
+
+            }
+
+        }
+    }
+    
     // TICK/UPDATE FUNCTION
 
-    public tick() {
+    update(delta: number) {
         const move = this.speed
         const sensitivity = this.planeCamera.getSensitivity()
         const deltaRoll = this.mouseDelta.dx * sensitivity
@@ -197,11 +254,9 @@ export class PlaneControls {
             this.keysPressed.delete('x')
         }
 
-        
-        if (this.plane.mixer) {
-            this.plane.mixer.update(this.clock.getDelta())
-        }
+        this.processPitch()
 
+        this.plane.mixer?.update(delta)
         this.updateCamera()
     }
 }

@@ -140,7 +140,6 @@ const Game: React.FC = () => {
         const mig29Controls = new PlaneControls({
             plane: f22,
             camera: camera,
-            clock: clock,
             domElement: container,
             camSensitivity: 0.002,
             camDefaultOffset: new THREE.Vector3(-20, 2, 0)
@@ -166,8 +165,7 @@ const Game: React.FC = () => {
                 transformControls?.update()
             } else {
                 f22.update(delta)
-                mig29Controls.tick()
-                mig29Controls.updateCamera()
+                mig29Controls.update(delta)
             }
             
             renderer.render(scene, camera)
