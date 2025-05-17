@@ -136,6 +136,9 @@ export class PlaneControls {
     ) {
         const mixer = this.plane.mixer
         const clip = this.plane.animations[clipName]
+
+        console.log(this.plane.animations)
+
         if (!mixer || !clip) return
 
         const action = mixer.clipAction(clip)
@@ -157,12 +160,12 @@ export class PlaneControls {
 
 
     public toggleLandingGear() {
-        this.playAnimationPart('Geardown', 10, this.landingGearDown)
+        this.playAnimationPart('Geardown', 6, this.landingGearDown)
         this.landingGearDown = !this.landingGearDown
     }
 
     public toggleWeaponsBay() {
-        this.playAnimationPart('Weapons', 10, this.weaponsBayDown)
+        this.playAnimationPart('Weapons', 5, this.weaponsBayDown)
         this.weaponsBayDown = !this.weaponsBayDown
     }
 
