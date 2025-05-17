@@ -3,6 +3,7 @@
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
 import { PlaneCameraRig } from './PlaneCameraRig'
+import { PlaneAnimations } from './PlaneAnimations'
 
 export interface PlaneControlsParams {
     plane: RenderPlane
@@ -30,18 +31,12 @@ export class PlaneControls {
 
     private mouseDelta = new MouseDelta()
 
+    private animator: PlaneAnimations
+
     private landingGearDown = true
     private weaponsBayDown = false
 
-    private pitchDir = 0
-    private flaps = 0
-    private lpitchup: THREE.AnimationAction | undefined
-    private lpitchdown: THREE.AnimationAction | undefined
-    private rpitchup: THREE.AnimationAction | undefined
-    private rpitchdown: THREE.AnimationAction | undefined
-    private pitchesSet = false
     
-
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
         this.camera = params.camera
@@ -53,6 +48,10 @@ export class PlaneControls {
             domElement: this.domElement,
             sensitivity: params.camSensitivity,
             defaultOffset: params.camDefaultOffset
+        })
+
+        this.animator = new PlaneAnimations({
+            plane: this.plane
         })
 
         this.bindInput()
@@ -88,7 +87,6 @@ export class PlaneControls {
             initialized = false //reset the nose controller 
             this.mouseDelta.dx = 0
             this.mouseDelta.dy = 0
-            this.pitchDir = 0
         })
 
         window.addEventListener('mousemove', (e) => {
@@ -106,10 +104,6 @@ export class PlaneControls {
 
             prevX = e.clientX
             prevY = e.clientY
-
-            if (this.mouseDelta.dx < 0) this.pitchDir = 1
-            else if (this.mouseDelta.dx > 0) this.pitchDir = -1
-            else this.pitchDir = 0
         })
     }
 
@@ -180,51 +174,11 @@ export class PlaneControls {
         this.weaponsBayDown = !this.weaponsBayDown
     }
 
-    private initPitch() {
-        if (this.pitchesSet) return
-        this.lpitchup = this.playAnimationPart('Lpitchup', 3, false)
-        this.lpitchdown = this.playAnimationPart('Lpitchdown', 3, false)
-        this.rpitchup = this.playAnimationPart('Rpitchup', 3, false)
-        this.rpitchdown = this.playAnimationPart('Rpitchdown', 3, false)
-        this.pitchesSet = true
-    }
-
     private processPitch() {
-        this.initPitch()
-
-        if (this.pitchDir == 1) {
-
-            if (this.flaps == 0) {
-                
-            } else if (this.flaps == -1) {
-
-            } else if (this.flaps == 1) {
-
-            }
-            
-        
-        } else if (this.pitchDir == -1) {
-
-            if (this.flaps == 0) {
-                
-            } else if (this.flaps == -1) {
-
-            } else if (this.flaps == 1) {
-
-            }
-        
-        } else {
-
-            if (this.flaps == 0) {
-                
-            } else if (this.flaps == -1) {
-
-            } else if (this.flaps == 1) {
-
-            }
-
-        }
+        this.animator.processPitch(this.mouseDelta.dy)
+        this.mouseDelta.dy = 0 // to pause curr anim if mouse stops moving
     }
+
     
     // TICK/UPDATE FUNCTION
 
