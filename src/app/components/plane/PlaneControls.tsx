@@ -165,12 +165,12 @@ export class PlaneControls {
 
 
     private toggleLandingGear() {
-        this.playAnimationPart('Geardown', 1, this.landingGearDown)?.play()
+        this.animator.toggleLandingGear(this.landingGearDown)
         this.landingGearDown = !this.landingGearDown
     }
 
     private toggleWeaponsBay() {
-        this.playAnimationPart('Weapons', 1, this.weaponsBayDown)?.play()
+        this.animator.toggleWeaponsBay(this.weaponsBayDown)
         this.weaponsBayDown = !this.weaponsBayDown
     }
 

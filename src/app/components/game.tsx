@@ -6,9 +6,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { setupRenderSky } from './RenderSky'
 import { setupRenderOcean } from './RenderOcean'
 import { RenderModel } from './RenderModel'
-import { RenderPlane } from './RenderPlane'
+import { RenderPlane } from './plane/RenderPlane'
 import { OrbitControlsManager, TransformControlManager } from './ControlsManager'
-import { PlaneControls } from './PlaneControls'
+import { PlaneControls } from './plane/PlaneControls'
 
 const toneExposure = 0.3
 const IS_DEV_MODE = false

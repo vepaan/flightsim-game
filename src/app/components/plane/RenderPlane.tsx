@@ -1,7 +1,7 @@
 'use client'
 
 import * as THREE from 'three'
-import { RenderModel, RenderModelParams } from './RenderModel'
+import { RenderModel, RenderModelParams } from '../RenderModel'
 
 export interface HitboxParams {
     dimensions: { length: number; width: number; height: number }

@@ -51,9 +51,22 @@ export class PlaneAnimations {
     }
 
 
+    // LANDING GEAR
+
+    toggleLandingGear(landingGearDown: boolean) {
+        this.playAnimationPart('Geardown', 1, landingGearDown)?.play()
+    }
+
+    // WEAPONS BAY
+
+    toggleWeaponsBay(weaponsBayDown: boolean) {
+        this.playAnimationPart('Weapons', 1, weaponsBayDown)?.play()
+    }
+
+
     // PITCH ANIMATIONS
 
-
+    
     private initPitch() {
         const mixer = this.plane.mixer;
         if (!mixer || this.pitchInited) return;
