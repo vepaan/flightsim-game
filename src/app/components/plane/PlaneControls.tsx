@@ -133,36 +133,6 @@ export class PlaneControls {
         this.planeCamera.updateCamera()
     }
 
-    // PLANE ANIMATION CONTROL
-
-    // This is the bread and butter that allows me to play any animation when any other animation is configured
-    private playAnimationPart(
-        clipName: string,
-        speed: number,
-        reverse: boolean,
-    ) {
-        const mixer = this.plane.mixer
-        const clip = this.plane.animations[clipName]
-
-        if (!mixer || !clip) return
-
-        const action = mixer.clipAction(clip)
-
-        action.stop()
-        action.reset()
-        action.setLoop(THREE.LoopOnce, 1)
-        action.clampWhenFinished = true
-
-        if (reverse) {
-            action.time = clip.duration
-            action.setEffectiveTimeScale(-speed)
-        } else {
-            action.setEffectiveTimeScale(speed)
-        }
-
-        return action
-    }
-
 
     private toggleLandingGear() {
         this.animator.toggleLandingGear(this.landingGearDown)
