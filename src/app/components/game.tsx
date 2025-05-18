@@ -120,15 +120,15 @@ const Game: React.FC = () => {
             loader: loader,
             url: '/models/f22.glb',
             scale: 2.5,
-            position: new THREE.Vector3(30.49, 6.05, 49.27),
-            rotation: {x: -180, y: 79.67-90, z: 177.61+4}
+            position: new THREE.Vector3(30.5, 6.05, 49.3),
+            rotation: {x: -180, y: -10.5, z: 180}
         })
 
         f22.load().then(() => {
             f22.setHitbox({
                 dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 6.6, z: 49.2 },
-                rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
+                position: { x: 30.5, y: 6.05, z: 49.3 },
+                rotation: { pitch: -180, yaw: 79.5, roll: 180 }
             })
             f22.lockHitbox()
             f22.toggleHitboxVisibility(false)
@@ -142,7 +142,8 @@ const Game: React.FC = () => {
             camera: camera,
             domElement: container,
             camSensitivity: 0.002,
-            camDefaultOffset: new THREE.Vector3(-20, 2, 0)
+            //camDefaultOffset: new THREE.Vector3(-20, 2, 0)
+            camDefaultOffset: new THREE.Vector3(-15, 2, 0)
         })
 
 

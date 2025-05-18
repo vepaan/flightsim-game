@@ -190,7 +190,7 @@ export class PlaneControls {
         if (!this.planeCamera.isDraggingMouse()) {
             // normal plane cam
             this.plane.applyRotation(deltaPitch, 0, deltaRoll)
-            //this.processPitch(); 
+            this.processPitch(); 
             this.processRoll()
         }
 
