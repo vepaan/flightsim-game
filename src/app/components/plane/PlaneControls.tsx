@@ -31,7 +31,7 @@ export class PlaneControls {
 
     private mouseDelta = new MouseDelta()
 
-    private animator: PlaneAnimations
+    private animator: PlaneAnimations | undefined
 
     private landingGearDown = true
     private weaponsBayDown = false
@@ -50,8 +50,10 @@ export class PlaneControls {
             defaultOffset: params.camDefaultOffset
         })
 
-        this.animator = new PlaneAnimations({
-            plane: this.plane
+        this.plane.ready.then(() => {
+            this.animator = new PlaneAnimations({
+                plane: this.plane
+            })
         })
 
         this.bindInput()
@@ -135,17 +137,18 @@ export class PlaneControls {
 
 
     private toggleLandingGear() {
-        this.animator.toggleLandingGear(this.landingGearDown)
+        this.animator?.toggleLandingGear(this.landingGearDown)
         this.landingGearDown = !this.landingGearDown
     }
 
     private toggleWeaponsBay() {
-        this.animator.toggleWeaponsBay(this.weaponsBayDown)
+        this.animator?.toggleWeaponsBay(this.weaponsBayDown)
         this.weaponsBayDown = !this.weaponsBayDown
     }
 
     private processPitch() {
-        this.animator.processPitch(this.mouseDelta.dy)
+        this.animator?.processLPitch(this.mouseDelta.dy)
+        this.animator?.processRPitch(this.mouseDelta.dy)
         this.mouseDelta.dy = 0 // to pause curr anim if mouse stops moving
     }
 

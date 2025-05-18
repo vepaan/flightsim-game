@@ -2,6 +2,7 @@
 
 import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
+import { ControlSurface } from './ControlSurface'
 
 export interface PlaneAnimationsParams {
     plane: RenderPlane
@@ -9,18 +10,29 @@ export interface PlaneAnimationsParams {
 
 export class PlaneAnimations {
 
+
     private plane: RenderPlane
 
-    private readonly maxPitchDrag = 20
-    private elevatorPosition = 0;
-    private pitchInited = false
-
-    private elevatorDown!: THREE.AnimationAction  
-    private elevatorUp!:   THREE.AnimationAction  
+    private leftElevator: ControlSurface
+    private rightElevator: ControlSurface
 
 
     constructor(params: PlaneAnimationsParams) {
         this.plane = params.plane
+
+        this.leftElevator = new ControlSurface({
+            plane: this.plane,
+            positiveClip: 'Lpitchup',
+            negativeClip: 'Lpitchdown',
+            dragMax: 20
+        })
+
+        this.rightElevator = new ControlSurface({
+            plane: this.plane,
+            positiveClip: 'Rpitchup',
+            negativeClip: 'Rpitchdown',
+            dragMax: 20
+        })
     }
 
     private playAnimationPart(
@@ -63,60 +75,16 @@ export class PlaneAnimations {
         this.playAnimationPart('Weapons', 1, weaponsBayDown)?.play()
     }
 
+    // LEFT PITCH
 
-    // PITCH ANIMATIONS
-
-    
-    private initPitch() {
-        const mixer = this.plane.mixer;
-        if (!mixer || this.pitchInited) return;
-        this.pitchInited = true;
-
-        const downClip = this.plane.animations['Lpitchdown'];
-        const upClip   = this.plane.animations['Lpitchup'];
-        if (!downClip || !upClip) {
-            console.warn('Missing down or up clip');
-            return;
-        }
-
-        this.elevatorDown = mixer.clipAction(downClip);
-        this.elevatorUp   = mixer.clipAction(upClip);
-
-        [this.elevatorDown, this.elevatorUp].forEach(a => {
-            a.reset();
-            a.setLoop(THREE.LoopOnce, 1);
-            a.clampWhenFinished = true;
-            a.play();
-            a.setEffectiveWeight(0); // mute initially
-        });
+    processLPitch(mouseDY: number) {
+        this.leftElevator.update(mouseDY)
     }
 
-    processPitch(mouseDY: number) {
-        this.initPitch();
-        if (!this.elevatorDown || !this.elevatorUp) return;
+    // RIGHT PITCH
 
-        const downDur = this.elevatorDown.getClip().duration;
-        const upDur   = this.elevatorUp.getClip().duration;
-
-        // integrate mouse-dy into a persistent parameter
-        this.elevatorPosition += -mouseDY / this.maxPitchDrag;
-        this.elevatorPosition = THREE.MathUtils.clamp(this.elevatorPosition, -1, 1);
-
-        // choose half-clip
-        if (this.elevatorPosition < 0) {
-            // down-side
-            this.elevatorDown.setEffectiveWeight(1);
-            this.elevatorUp.setEffectiveWeight(0);
-            this.elevatorDown.time = Math.abs(this.elevatorPosition) * downDur;
-        } else {
-            // up-side
-            this.elevatorUp.setEffectiveWeight(1);
-            this.elevatorDown.setEffectiveWeight(0);
-            this.elevatorUp.time = this.elevatorPosition * upDur;
-        }
-
-        // apply pose immediately
-        this.plane.mixer?.update(0);
+    processRPitch(mouseDY: number) {
+        this.rightElevator.update(mouseDY)
     }
 
 }

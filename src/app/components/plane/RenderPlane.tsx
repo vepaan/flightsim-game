@@ -10,10 +10,13 @@ export interface HitboxParams {
 }
 
 export class RenderPlane extends RenderModel {
+    public ready: Promise<void>
     public wrapper: THREE.Group
     private helper: THREE.BoxHelper
     private axes: THREE.AxesHelper
     private hitboxConfigured: boolean = false
+
+    private resolveReady!: () => void
 
     constructor(params: RenderModelParams) {
         super(params)
@@ -26,10 +29,14 @@ export class RenderPlane extends RenderModel {
 
         params.scene.add(this.wrapper)
         params.scene.add(this.helper)
+
+        this.ready = new Promise(res => { this.resolveReady = res })
     }
 
     async load(): Promise<THREE.Group> {
         this.model = await super.load()
+
+        this.resolveReady()
 
         // if not alr in geardown, make it geardown
         if (this.mixer) {
