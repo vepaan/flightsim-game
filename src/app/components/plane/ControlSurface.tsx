@@ -49,17 +49,22 @@ export class ControlSurface {
         this.pos += -deltaMouse / this.dragMax
         this.pos = THREE.MathUtils.clamp(this.pos, -1, 1)
 
-        if (this.pos < 0) {
-            this.negative.setEffectiveWeight(1)
-            this.positive.setEffectiveWeight(0)
-            this.negative.time = Math.abs(this.pos) * negDur
-        } else {
-            this.positive.setEffectiveWeight(1)
-            this.negative.setEffectiveWeight(0)
-            this.positive.time = this.pos * posDur
+        if (this.pos > 0) {
+            this.positive.setEffectiveWeight(1);
+            this.negative.setEffectiveWeight(0);
+            this.positive.time = this.pos * posDur;
+        }
+        else if (this.pos < 0) {
+            this.negative.setEffectiveWeight(1);
+            this.positive.setEffectiveWeight(0);
+            this.negative.time = -this.pos * negDur;
+        }
+        else {
+            this.positive.setEffectiveWeight(0);
+            this.negative.setEffectiveWeight(0);
         }
 
-        this.mixer.update(0)
+        //this.mixer.update(0)
     }
 
     getPosition() {
