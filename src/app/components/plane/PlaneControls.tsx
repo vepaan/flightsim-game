@@ -172,6 +172,12 @@ export class PlaneControls {
         this.animator?.processRudder(rudderDelta)
     }
 
+    private processRoll() {
+        this.animator?.processLeftAlieron(this.mouseDelta.dx)
+        this.animator?.processRightAlieron(-this.mouseDelta.dx)
+        this.mouseDelta.dx = 0 // pause if mouse stops moving
+    }
+
     
     // TICK/UPDATE FUNCTION
 
@@ -184,11 +190,13 @@ export class PlaneControls {
         if (!this.planeCamera.isDraggingMouse()) {
             // normal plane cam
             this.plane.applyRotation(deltaPitch, 0, deltaRoll)
-            this.processPitch()
+            //this.processPitch(); 
+            this.processRoll()
         }
 
         if (this.keysPressed.has('w')) this.plane.moveForward(move)
         if (this.keysPressed.has('s')) this.plane.moveBackward(move)
+
 
         // executes for a or d is pressed
         this.processYaw()
@@ -203,7 +211,6 @@ export class PlaneControls {
             this.toggleWeaponsBay()
             this.keysPressed.delete('x')
         }
-
 
 
         this.plane.mixer?.update(delta)

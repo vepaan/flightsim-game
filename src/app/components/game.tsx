@@ -137,7 +137,7 @@ const Game: React.FC = () => {
 
 
         // plane controls
-        const mig29Controls = new PlaneControls({
+        const f22Controls = new PlaneControls({
             plane: f22,
             camera: camera,
             domElement: container,
@@ -165,7 +165,7 @@ const Game: React.FC = () => {
                 transformControls?.update()
             } else {
                 f22.update(delta)
-                mig29Controls.update(delta)
+                f22Controls.update(delta)
             }
             
             renderer.render(scene, camera)

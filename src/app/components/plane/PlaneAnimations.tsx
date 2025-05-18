@@ -66,7 +66,7 @@ export class PlaneAnimations {
         })
     }
 
-    private playAnimationPart(
+    playAnimationPart(
         clipName: string,
         speed: number,
         reverse: boolean,
