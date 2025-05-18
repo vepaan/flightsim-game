@@ -22,8 +22,6 @@ export class ControlSurface {
         this.plane = params.plane
         this.mixer = this.plane.mixer!
         this.dragMax = params.dragMax
-        
-        console.log(this.plane.animations['Lpitchup'])
 
         const positiveClip = this.plane.animations[params.positiveClip]
         const negativeClip = this.plane.animations[params.negativeClip]
@@ -62,5 +60,13 @@ export class ControlSurface {
         }
 
         this.mixer.update(0)
+    }
+
+    getPosition() {
+        return this.pos
+    }
+
+    getDragMax() {
+        return this.dragMax
     }
 }

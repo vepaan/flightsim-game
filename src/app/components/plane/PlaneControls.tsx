@@ -136,6 +136,8 @@ export class PlaneControls {
     }
 
 
+    // CONTROL SURFACES
+
     private toggleLandingGear() {
         this.animator?.toggleLandingGear(this.landingGearDown)
         this.landingGearDown = !this.landingGearDown
@@ -147,9 +149,27 @@ export class PlaneControls {
     }
 
     private processPitch() {
-        this.animator?.processLPitch(this.mouseDelta.dy)
-        this.animator?.processRPitch(this.mouseDelta.dy)
+        this.animator?.processLeftElevator(this.mouseDelta.dy)
+        this.animator?.processRightElevator(this.mouseDelta.dy)
         this.mouseDelta.dy = 0 // to pause curr anim if mouse stops moving
+    }
+
+    private processYaw() {
+        let rudderDelta = 0
+
+        if (this.keysPressed.has('a')) {
+            this.rotateYaw(1)
+            if (this.animator) rudderDelta = this.animator?.rudder.getDragMax()
+        } else if (this.keysPressed.has('d')) {
+            this.rotateYaw(-1)
+            if (this.animator) rudderDelta = -this.animator?.rudder.getDragMax()
+        } else {
+            if (!this.animator) return
+            const pos = this.animator?.rudder.getPosition()
+            rudderDelta = pos * this.animator.rudder.getDragMax()
+        }
+
+        this.animator?.processRudder(rudderDelta)
     }
 
     
@@ -162,13 +182,16 @@ export class PlaneControls {
         const deltaPitch = this.mouseDelta.dy * sensitivity
 
         if (!this.planeCamera.isDraggingMouse()) {
+            // normal plane cam
             this.plane.applyRotation(deltaPitch, 0, deltaRoll)
+            this.processPitch()
         }
 
         if (this.keysPressed.has('w')) this.plane.moveForward(move)
         if (this.keysPressed.has('s')) this.plane.moveBackward(move)
-        if (this.keysPressed.has('a')) this.rotateYaw(1)
-        if (this.keysPressed.has('d')) this.rotateYaw(-1)
+
+        // executes for a or d is pressed
+        this.processYaw()
 
 
         if (this.keysPressed.has('g')) {
@@ -181,7 +204,7 @@ export class PlaneControls {
             this.keysPressed.delete('x')
         }
 
-        this.processPitch()
+
 
         this.plane.mixer?.update(delta)
         this.updateCamera()

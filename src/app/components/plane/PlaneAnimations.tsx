@@ -10,15 +10,21 @@ export interface PlaneAnimationsParams {
 
 export class PlaneAnimations {
 
-
     private plane: RenderPlane
 
-    private leftElevator: ControlSurface
-    private rightElevator: ControlSurface
+    public leftElevator: ControlSurface
+    public rightElevator: ControlSurface
+
+    public leftAlieron: ControlSurface
+    public rightAlieron: ControlSurface
+
+    public rudder: ControlSurface
 
 
     constructor(params: PlaneAnimationsParams) {
         this.plane = params.plane
+
+        // ELEVATORS
 
         this.leftElevator = new ControlSurface({
             plane: this.plane,
@@ -31,6 +37,31 @@ export class PlaneAnimations {
             plane: this.plane,
             positiveClip: 'Rpitchup',
             negativeClip: 'Rpitchdown',
+            dragMax: 20
+        })
+
+        // ALIERONS
+
+        this.leftAlieron = new ControlSurface({
+            plane: this.plane,
+            positiveClip: 'Lwingup',
+            negativeClip: 'Lwingdown',
+            dragMax: 20
+        })
+
+        this.rightAlieron = new ControlSurface({
+            plane: this.plane,
+            positiveClip: 'Rwingup',
+            negativeClip: 'Rwingdown',
+            dragMax: 20
+        })
+
+        // RUDDER
+
+        this.rudder = new ControlSurface({
+            plane: this.plane,
+            positiveClip: 'Rudderright',
+            negativeClip: 'Rudderleft',
             dragMax: 20
         })
     }
@@ -75,16 +106,34 @@ export class PlaneAnimations {
         this.playAnimationPart('Weapons', 1, weaponsBayDown)?.play()
     }
 
-    // LEFT PITCH
+    // LEFT ELEVATOR
 
-    processLPitch(mouseDY: number) {
+    processLeftElevator(mouseDY: number) {
         this.leftElevator.update(mouseDY)
     }
 
-    // RIGHT PITCH
+    // RIGHT ELEVATOR
 
-    processRPitch(mouseDY: number) {
+    processRightElevator(mouseDY: number) {
         this.rightElevator.update(mouseDY)
+    }
+
+    // LEFT AILERON
+
+    processLeftAlieron(mouseDX: number) {
+        this.leftAlieron.update(mouseDX)
+    }
+
+    // RIGHT ALIERON
+
+    processRightAlieron(mouseDX: number) {
+        this.rightAlieron.update(mouseDX)
+    }
+
+    // RUDDER
+
+    processRudder(delta: number) {
+        this.rudder.update(delta)
     }
 
 }
