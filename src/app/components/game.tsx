@@ -9,6 +9,7 @@ import { RenderModel } from './RenderModel'
 import { RenderPlane } from './plane/RenderPlane'
 import { OrbitControlsManager, TransformControlManager } from './ControlsManager'
 import { PlaneControls } from './plane/PlaneControls'
+import { initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
 const IS_DEV_MODE = false
@@ -69,7 +70,13 @@ const Game: React.FC = () => {
             )
         }
 
-        
+
+        // PHYSICS
+        let physicsReady = false
+        initPhysics().then(() => {
+            physicsReady = true
+        })
+
 
         // MODEL LOADER
         const loader = new GLTFLoader()
@@ -84,7 +91,8 @@ const Game: React.FC = () => {
             scale: 0.1,
             position: new THREE.Vector3(28, -4, 11),
             rotation: {x: 0, y: 0, z: 0},
-            isSolid: true
+            isSolid: true,
+            dynamic: false
         })
         
         aircraftCarrier.load().then((model) => {
@@ -101,7 +109,8 @@ const Game: React.FC = () => {
             scale: 0.05,
             position: new THREE.Vector3(30.49, 6.61, 49.27),
             rotation: {x: -175.72, y: 79.67, z: 177.61},
-            isSolid: true
+            isSolid: true,
+            dynamic: false
         })
 
         mig29.load().then(() => {
@@ -124,7 +133,8 @@ const Game: React.FC = () => {
             scale: 2.5,
             position: new THREE.Vector3(30.5, 6.05, 49.3),
             rotation: {x: -180, y: -10.5, z: 180},
-            isSolid: true
+            isSolid: true,
+            dynamic: true
         })
 
         f22.load().then(() => {
@@ -163,6 +173,12 @@ const Game: React.FC = () => {
             updateOcean()
 
             const delta = clock.getDelta()
+
+            if (physicsReady) {
+                stepPhysics(delta)
+                f22.solid?.updatePhysics()
+                aircraftCarrier.solid?.updatePhysics()
+            }
 
             if (IS_DEV_MODE) {
                 orbitControls?.update()

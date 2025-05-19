@@ -11,13 +11,14 @@ export interface RenderModelParams {
     position?: THREE.Vector3
     rotation?: { x?: number; y?: number; z?: number } // in degrees
     isSolid: boolean
+    dynamic: boolean
 }
 
 export class RenderModel {
 
     public model!: THREE.Group
     public mixer?: THREE.AnimationMixer
-    private solid?: SolidBody
+    public solid?: SolidBody
     public animations: Record<string, THREE.AnimationClip> = {}
 
     constructor(public params: RenderModelParams) {}
@@ -30,7 +31,8 @@ export class RenderModel {
             scale = 1,
             position = new THREE.Vector3(),
             rotation = { x: 0, y: 0, z: 0 },
-            isSolid
+            isSolid,
+            dynamic
         } = this.params
 
         return new Promise((resolve, reject) => {
@@ -62,7 +64,8 @@ export class RenderModel {
 
                     if (this.params.isSolid) {
                         this.solid = new SolidBody({
-                            model: this.model
+                            model: this.model,
+                            dynamic: this.params.dynamic
                         })
                     }
 
