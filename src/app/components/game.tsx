@@ -9,10 +9,10 @@ import { RenderModel } from './RenderModel'
 import { RenderPlane } from './plane/RenderPlane'
 import { OrbitControlsManager, TransformControlManager } from './ControlsManager'
 import { PlaneControls } from './plane/PlaneControls'
-import { initPhysics, stepPhysics } from './physics/PhysicsWorld'
+import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
-const IS_DEV_MODE = false
+const IS_DEV_MODE = true
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -70,6 +70,7 @@ const Game: React.FC = () => {
 
         // PHYSICS
         await initPhysics()
+        createGround(350, 5, 350)
 
 
         // MODEL LOADER
@@ -82,10 +83,10 @@ const Game: React.FC = () => {
             loader: loader,
             url: '/models/aircraft_carrier.glb',
             scale: 0.1,
-            position: new THREE.Vector3(28, -4, 11),
+            position: new THREE.Vector3(28, 100, 11), // -4 for 10
             rotation: {x: 0, y: 0, z: 0},
             isSolid: true,
-            dynamic: false
+            dynamic: true
         })
         
         aircraftCarrier.load().then((model) => {
@@ -136,7 +137,7 @@ const Game: React.FC = () => {
                 rotation: { pitch: -180, yaw: 79.5, roll: 180 }
             })
             f22.lockHitbox()
-            f22.toggleHitboxVisibility(false)
+            f22.toggleHitboxVisibility(true)
             f22Ref.current = f22.wrapper
         })
 
@@ -166,15 +167,16 @@ const Game: React.FC = () => {
 
             const delta = clock.getDelta()
 
+            stepPhysics(delta)
+            f22.solid?.updatePhysics()
+            aircraftCarrier.solid?.updatePhysics()
+
             if (IS_DEV_MODE) {
                 orbitControls?.update()
                 transformControls?.update()
             } else {
-                stepPhysics(delta)
-                f22.solid?.updatePhysics()
-                aircraftCarrier.solid?.updatePhysics()
-                //f22.update(delta)
-                //f22Controls.update(delta)
+                f22.update(delta)
+                f22Controls.update(delta)
             }
             
             renderer.render(scene, camera)

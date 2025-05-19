@@ -26,7 +26,7 @@ export class TransformControlManager {
         this.controls.addEventListener('objectChange', () => {
             const obj = this.controls.object
             if (obj) {
-                console.clear()
+                //console.clear()
                 const pos = obj.position
                 const rot = obj.rotation
                 const scale = obj.scale
@@ -78,7 +78,7 @@ export class OrbitControlsManager {
         this.controls.enableDamping = true
 
         this.controls.addEventListener('change', () => {
-            console.clear()
+            //console.clear()
             console.log(`Camera Position: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`)
         })       
     }

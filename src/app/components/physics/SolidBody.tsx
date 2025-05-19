@@ -48,8 +48,12 @@ export class SolidBody {
                 const colliderDesc = RAPIER.ColliderDesc
                     .cuboid(halfExtents.x, halfExtents.y, halfExtents.z)
                     .setTranslation(center.x, center.y, center.z)
+                    .setDensity(1)
 
                 this.colliders.push(colliderDesc)
+
+                const helper = new THREE.BoxHelper(child, 0xff0000)
+                child.add(helper)
             }
         })
 
@@ -64,7 +68,7 @@ export class SolidBody {
         let bodyDesc = null
 
         if (this.dynamic) {
-            bodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            bodyDesc = RAPIER.RigidBodyDesc.dynamic().setCcdEnabled(true)
         } else {
             bodyDesc = RAPIER.RigidBodyDesc.fixed()
         }

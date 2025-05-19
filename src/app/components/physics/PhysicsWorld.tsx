@@ -3,7 +3,7 @@
 import RAPIER from '@dimforge/rapier3d-compat'
 
 let world: RAPIER.World
-const FIXED_TIMESTEP = 1 / 60
+const FIXED_TIMESTEP = 1 / 120
 let accumulator = 0
 
 export async function initPhysics() {
@@ -22,4 +22,13 @@ export function stepPhysics(delta: number) {
 
 export function getPhysicsWorld() {
     return world
+}
+
+export function createGround(x: number, y: number, z: number) {
+    const groundBodyDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0, 0, 0)
+    const groundBody = world.createRigidBody(groundBodyDesc)
+    const groundCollider = RAPIER.ColliderDesc.cuboid(x, y, z)
+        .setFriction(1.0)
+        .setRestitution(0.2)
+    world.createCollider(groundCollider, groundBody)
 }
