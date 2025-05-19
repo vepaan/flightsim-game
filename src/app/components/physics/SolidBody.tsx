@@ -23,71 +23,62 @@ export class SolidBody {
     }
 
     private createSolid() {
-
         const world = getPhysicsWorld()
 
-        this.model.traverse(child => {
-            if (child instanceof THREE.Mesh) {
+        const boundingBox = new THREE.Box3().setFromObject(this.model)
+        const dimensions = new THREE.Vector3();
+        boundingBox.getSize(dimensions);
+        
+        const center = new THREE.Vector3();
+        boundingBox.getCenter(center);
 
-                child.geometry.computeBoundingBox()
-                const bbox = child.geometry.boundingBox!
-                const size = new THREE.Vector3();
-                bbox.getSize(size) // size = max - min
+        const halfExtents = dimensions.clone().multiplyScalar(0.5);
+        
+        const mainCollider = RAPIER.ColliderDesc
+            .cuboid(
+                halfExtents.x * 1.05, 
+                halfExtents.y * 1.05, 
+                halfExtents.z * 1.05
+            )
+            .setTranslation(
+                center.x - this.model.position.x,
+                center.y - this.model.position.y,
+                center.z - this.model.position.z
+            )
+            .setFriction(0.7)
+            .setRestitution(0.2);
+        
+        this.colliders.push(mainCollider);
 
-                const halfExtents = size.multiplyScalar(0.5)
+        this.model.updateWorldMatrix(true, true);
 
-                const center = new THREE.Vector3()
-                bbox.getCenter(center)
+        const worldPos = new THREE.Vector3();
+        const worldQuat = new THREE.Quaternion();
 
-                // account for scaling
-                halfExtents.x *= child.scale.x
-                halfExtents.y *= child.scale.y
-                halfExtents.z *= child.scale.z
-                center.multiply(child.scale)
+        this.model.getWorldPosition(worldPos);
+        this.model.getWorldQuaternion(worldQuat);
 
-                const colliderDesc = RAPIER.ColliderDesc
-                    .cuboid(halfExtents.x, halfExtents.y, halfExtents.z)
-                    .setTranslation(center.x, center.y, center.z)
-                    .setDensity(1)
-
-                this.colliders.push(colliderDesc)
-
-                const helper = new THREE.BoxHelper(child, 0xff0000)
-                child.add(helper)
-            }
-        })
-
-        this.model.updateWorldMatrix(true, false)
-
-        const worldPos = new THREE.Vector3()
-        const worldQuat = new THREE.Quaternion()
-
-        this.model.getWorldPosition(worldPos)
-        this.model.getWorldQuaternion(worldQuat)
-
-        let bodyDesc = null
-
+        let bodyDesc;
         if (this.dynamic) {
-            bodyDesc = RAPIER.RigidBodyDesc.dynamic().setCcdEnabled(true)
+            bodyDesc = RAPIER.RigidBodyDesc.dynamic()
+                .setCcdEnabled(true)
         } else {
-            bodyDesc = RAPIER.RigidBodyDesc.fixed()
+            bodyDesc = RAPIER.RigidBodyDesc.fixed();
         }
 
-        
         bodyDesc.setTranslation(worldPos.x, worldPos.y, worldPos.z)
             .setRotation({
                 x: worldQuat.x,
                 y: worldQuat.y,
                 z: worldQuat.z,
                 w: worldQuat.w
-            })
+            });
 
-        this.body = world.createRigidBody(bodyDesc)
+        this.body = world.createRigidBody(bodyDesc);
+        
         this.colliders.forEach(cd => 
             world.createCollider(cd, this.body)
-        )
-
-        console.log("Solid ready")
+        );
     }
 
     updatePhysics() {

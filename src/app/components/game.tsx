@@ -70,7 +70,7 @@ const Game: React.FC = () => {
 
         // PHYSICS
         await initPhysics()
-        createGround(350, 5, 350)
+        createGround(2000, 0.1, 2000)
 
 
         // MODEL LOADER
@@ -83,10 +83,10 @@ const Game: React.FC = () => {
             loader: loader,
             url: '/models/aircraft_carrier.glb',
             scale: 0.1,
-            position: new THREE.Vector3(28, 100, 11), // -4 for 10
+            position: new THREE.Vector3(28, -4, 11), // -4 for 10
             rotation: {x: 0, y: 0, z: 0},
             isSolid: true,
-            dynamic: true
+            dynamic: false
         })
         
         aircraftCarrier.load().then((model) => {
