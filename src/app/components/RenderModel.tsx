@@ -1,6 +1,7 @@
 'use client'
 
 import * as THREE from 'three'
+import { SolidBody } from './physics/SolidBody'
 
 export interface RenderModelParams {
     scene: THREE.Scene
@@ -9,12 +10,14 @@ export interface RenderModelParams {
     scale?: number
     position?: THREE.Vector3
     rotation?: { x?: number; y?: number; z?: number } // in degrees
+    isSolid: boolean
 }
 
 export class RenderModel {
 
     public model!: THREE.Group
     public mixer?: THREE.AnimationMixer
+    private solid?: SolidBody
     public animations: Record<string, THREE.AnimationClip> = {}
 
     constructor(public params: RenderModelParams) {}
@@ -26,7 +29,8 @@ export class RenderModel {
             url,
             scale = 1,
             position = new THREE.Vector3(),
-            rotation = { x: 0, y: 0, z: 0 }
+            rotation = { x: 0, y: 0, z: 0 },
+            isSolid
         } = this.params
 
         return new Promise((resolve, reject) => {
@@ -55,6 +59,13 @@ export class RenderModel {
 
                     scene.add(model)
                     this.model = model
+
+                    if (this.params.isSolid) {
+                        this.solid = new SolidBody({
+                            model: this.model
+                        })
+                    }
+
                     resolve(model)
                 },
                 (event: ProgressEvent<EventTarget>) => {

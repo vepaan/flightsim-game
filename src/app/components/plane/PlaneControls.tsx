@@ -212,16 +212,6 @@ export class PlaneControls {
             this.keysPressed.delete('x')
         }
 
-        if (this.keysPressed.has('i')) {
-            this.animator?.playAnimationPart('Rwingup', 3, false)?.play()
-            this.keysPressed.delete('i')
-        }
-
-        if (this.keysPressed.has('k')) {
-            this.animator?.playAnimationPart('Lwingup', 3, false)?.play()
-            this.keysPressed.delete('k')
-        }
-
 
         this.plane.mixer?.update(delta)
         this.updateCamera()

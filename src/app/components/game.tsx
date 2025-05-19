@@ -83,7 +83,8 @@ const Game: React.FC = () => {
             url: '/models/aircraft_carrier.glb',
             scale: 0.1,
             position: new THREE.Vector3(28, -4, 11),
-            rotation: {x: 0, y: 0, z: 0}
+            rotation: {x: 0, y: 0, z: 0},
+            isSolid: true
         })
         
         aircraftCarrier.load().then((model) => {
@@ -99,7 +100,8 @@ const Game: React.FC = () => {
             url: '/models/mig29.glb',
             scale: 0.05,
             position: new THREE.Vector3(30.49, 6.61, 49.27),
-            rotation: {x: -175.72, y: 79.67, z: 177.61}
+            rotation: {x: -175.72, y: 79.67, z: 177.61},
+            isSolid: true
         })
 
         mig29.load().then(() => {
@@ -121,7 +123,8 @@ const Game: React.FC = () => {
             url: '/models/f22.glb',
             scale: 2.5,
             position: new THREE.Vector3(30.5, 6.05, 49.3),
-            rotation: {x: -180, y: -10.5, z: 180}
+            rotation: {x: -180, y: -10.5, z: 180},
+            isSolid: true
         })
 
         f22.load().then(() => {
