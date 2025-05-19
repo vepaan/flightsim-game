@@ -22,10 +22,7 @@ const Game: React.FC = () => {
     const f22Ref = useRef<THREE.Group | null>(null)
     const aircraftCarrierRef = useRef<THREE.Group | null>(null)
 
-    useEffect(() => {
-        const container = mountRef.current
-        if (!container) return
-
+    async function bootstrapScene(container: HTMLDivElement) {
         // SCENE
         const scene = new THREE.Scene()
         scene.background = null
@@ -72,15 +69,11 @@ const Game: React.FC = () => {
 
 
         // PHYSICS
-        let physicsReady = false
-        initPhysics().then(() => {
-            physicsReady = true
-        })
+        await initPhysics()
 
 
         // MODEL LOADER
         const loader = new GLTFLoader()
-
 
 
         // AIRCRAFT CARRIER
@@ -100,7 +93,6 @@ const Game: React.FC = () => {
         })
         
 
-        
         // PLANE
         const mig29 = new RenderPlane({
             scene: scene,
@@ -174,18 +166,15 @@ const Game: React.FC = () => {
 
             const delta = clock.getDelta()
 
-            if (physicsReady) {
-                stepPhysics(delta)
-                f22.solid?.updatePhysics()
-                aircraftCarrier.solid?.updatePhysics()
-            }
-
             if (IS_DEV_MODE) {
                 orbitControls?.update()
                 transformControls?.update()
             } else {
-                f22.update(delta)
-                f22Controls.update(delta)
+                stepPhysics(delta)
+                f22.solid?.updatePhysics()
+                aircraftCarrier.solid?.updatePhysics()
+                //f22.update(delta)
+                //f22Controls.update(delta)
             }
             
             renderer.render(scene, camera)
@@ -203,6 +192,12 @@ const Game: React.FC = () => {
             orbitControls.dispose()
             container.removeChild(renderer.domElement)
         }
+    }
+
+    useEffect(() => {
+        const container = mountRef.current
+        if (!container) return
+        bootstrapScene(container)        
     }, [])
 
     return (

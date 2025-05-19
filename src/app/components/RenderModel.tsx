@@ -70,6 +70,7 @@ export class RenderModel {
                     }
 
                     resolve(model)
+                    console.log("Model resolved", url)
                 },
                 (event: ProgressEvent<EventTarget>) => {
                     const loaded = event.loaded

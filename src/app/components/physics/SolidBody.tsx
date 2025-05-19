@@ -83,6 +83,7 @@ export class SolidBody {
             world.createCollider(cd, this.body)
         )
 
+        console.log("Solid ready")
     }
 
     updatePhysics() {
