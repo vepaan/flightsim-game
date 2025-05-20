@@ -127,12 +127,13 @@ export class RenderModel {
         action.play()
     }
 
-    makeSolid(dynamic: boolean, debug: boolean) {
+    makeSolid(dynamic: boolean, debug: boolean, complex: boolean) {
         if (this.solid) return
         this.solid = new SolidBody({
             model: this.model,
             dynamic: dynamic,
-            debug: debug
+            debug: debug,
+            complex: complex
         })
     }
 

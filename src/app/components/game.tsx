@@ -149,7 +149,7 @@ const Game: React.FC = () => {
             })
             f22.lockHitbox()
             f22.toggleHitboxVisibility(false)
-            f22.makeSolid(true, false)
+            f22.makeSolid(true, true, false)
             f22Ref.current = f22.wrapper
         })
 
