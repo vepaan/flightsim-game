@@ -7,18 +7,21 @@ import { getPhysicsWorld } from './PhysicsWorld'
 export interface SolidBodyParams {
     model: THREE.Object3D
     dynamic: boolean
+    debug: boolean
 }
 
 export class SolidBody {
 
     private model: THREE.Object3D
     private dynamic: boolean
+    private debug: boolean
     private body: RAPIER.RigidBody | undefined
     private colliders: RAPIER.ColliderDesc[] = []
 
     constructor(params: SolidBodyParams) {
         this.model = params.model
         this.dynamic = params.dynamic
+        this.debug = params.debug
         this.createSolid()
     }
 
@@ -49,6 +52,24 @@ export class SolidBody {
             .setRestitution(0.2)
         
         this.colliders.push(mainCollider)
+
+        if (this.debug) {
+            const boxGeometry = new THREE.BoxGeometry(
+                halfExtents.x * 2 * 1.05, 
+                halfExtents.y * 2 * 1.05, 
+                halfExtents.z * 2 * 1.05
+            );
+            const boxMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ff00,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+            boxMesh.position.copy(center.clone().sub(this.model.position));
+            this.model.add(boxMesh);
+        }
 
         this.model.updateWorldMatrix(true, true)
 

@@ -56,13 +56,14 @@ export class RenderPlane extends RenderModel {
         return this.model
     }
 
-    makeSolid(dynamic: boolean) {
+    makeSolid(dynamic: boolean, debug: boolean) {
         if (this.solid) return;
         this.wrapper.updateWorldMatrix(true, false)
 
         this.solid = new SolidBody({
             model: this.wrapper,
-            dynamic: dynamic
+            dynamic: dynamic,
+            debug: debug
         })
     }
 

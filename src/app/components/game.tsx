@@ -88,7 +88,7 @@ const Game: React.FC = () => {
         })
         
         aircraftCarrier.load().then((model) => {
-            aircraftCarrier.makeSolid(false)
+            aircraftCarrier.makeSolid(false, true)
             aircraftCarrierRef.current = model
         })
         
@@ -133,7 +133,7 @@ const Game: React.FC = () => {
             })
             f22.lockHitbox()
             f22.toggleHitboxVisibility(true)
-            f22.makeSolid(true)
+            f22.makeSolid(true, true)
             f22Ref.current = f22.wrapper
         })
 
