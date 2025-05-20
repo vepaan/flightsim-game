@@ -50,6 +50,7 @@ export class SolidBody {
             )
             .setFriction(0.7)
             .setRestitution(0.2)
+            .setDensity(1)
         
         this.colliders.push(mainCollider)
 
@@ -82,7 +83,6 @@ export class SolidBody {
         let bodyDesc;
         if (this.dynamic) {
             bodyDesc = RAPIER.RigidBodyDesc.dynamic()
-                .setCcdEnabled(true)
         } else {
             bodyDesc = RAPIER.RigidBodyDesc.fixed()
         }
@@ -95,7 +95,8 @@ export class SolidBody {
                 w: worldQuat.w
             })
             .setLinearDamping(0.1)  // Add damping to make movement more stable
-            .setAngularDamping(0.1); // Reduce spinning
+            .setAngularDamping(0.1) // Reduce spinning
+            .setCcdEnabled(true)
 
         this.body = world.createRigidBody(bodyDesc)
         

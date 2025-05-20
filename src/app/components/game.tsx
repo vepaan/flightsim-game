@@ -71,6 +71,7 @@ const Game: React.FC = () => {
         // PHYSICS
         await initPhysics()
         createGround(2000, 0.1, 2000)
+        createGround(100, 5, 100)
 
 
         // MODEL LOADER
@@ -88,7 +89,6 @@ const Game: React.FC = () => {
         })
         
         aircraftCarrier.load().then((model) => {
-            aircraftCarrier.makeSolid(false, true)
             aircraftCarrierRef.current = model
         })
         
@@ -128,12 +128,12 @@ const Game: React.FC = () => {
         f22.load().then(() => {
             f22.setHitbox({
                 dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 100.05, z: 49.3 },
+                position: { x: 30.5, y: 20, z: 49.3 },
                 rotation: { pitch: -180, yaw: -10.5, roll: 180 }
             })
             f22.lockHitbox()
             f22.toggleHitboxVisibility(true)
-            f22.makeSolid(true, true)
+            f22.makeSolid(true, false)
             f22Ref.current = f22.wrapper
         })
 

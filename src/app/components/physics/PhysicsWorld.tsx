@@ -3,7 +3,7 @@
 import RAPIER from '@dimforge/rapier3d-compat'
 
 let world: RAPIER.World
-const FIXED_TIMESTEP = 1 / 120
+const FIXED_TIMESTEP = 1 / 60
 let accumulator = 0
 
 export async function initPhysics() {
