@@ -115,4 +115,12 @@ export class SolidBody {
         this.model.quaternion.set(r.x, r.y, r.z, r.w)
     }
 
+    applyImpulse(force: THREE.Vector3) {
+        if (!this.body || !this.dynamic) return
+        this.body.applyImpulse(
+            {x: force.x, y: force.y, z: force.z},
+            true
+        )
+    }
+
 }

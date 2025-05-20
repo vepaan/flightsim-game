@@ -124,15 +124,15 @@ export class RenderPlane extends RenderModel {
         this.helper.update()
     }
 
-    moveForward(distance: number) {
-        const dir = new THREE.Vector3(1, 0, 0).applyQuaternion(this.wrapper.quaternion)
-        this.wrapper.position.add(dir.multiplyScalar(distance))
+    moveForward(thrust: number) {
+        const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.wrapper.quaternion)
+        this.solid?.applyImpulse(dir.multiplyScalar(thrust))
         this.helper.update()
     }
 
-    moveBackward(distance: number) {
-        const dir = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.wrapper.quaternion)
-        this.wrapper.position.add(dir.multiplyScalar(distance))
+    moveBackward(thrust: number) {
+        const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(this.wrapper.quaternion)
+        this.solid?.applyImpulse(dir.multiplyScalar(thrust))
         this.helper.update()
     }
 

@@ -23,7 +23,7 @@ export class PlaneControls {
     private plane: RenderPlane
     private camera: THREE.Camera
     private domElement: HTMLElement
-    private speed = 0.5
+    private speed = 50
 
     private planeCamera: PlaneCameraRig
 

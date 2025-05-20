@@ -12,7 +12,7 @@ import { PlaneControls } from './plane/PlaneControls'
 import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
-const IS_DEV_MODE = true
+const IS_DEV_MODE = false
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -70,8 +70,15 @@ const Game: React.FC = () => {
 
         // PHYSICS
         await initPhysics()
-        createGround(2000, 0.1, 2000)
-        createGround(100, 5, 100)
+        createGround({
+            x: 2000,
+            y: 0.1,
+            z: 2000,
+            position: new THREE.Vector3(0, 0, 0),
+            rotation: new THREE.Euler(0, 0, 0),
+            scene: scene,
+            debug: false
+        })
 
 
         // MODEL LOADER
@@ -90,6 +97,15 @@ const Game: React.FC = () => {
         
         aircraftCarrier.load().then((model) => {
             aircraftCarrierRef.current = model
+            createGround({
+                x: 12,
+                y: 0.05,
+                z: 52,
+                position: new THREE.Vector3(28, 5.6, 5),
+                rotation: new THREE.Euler(0, 0, 0),
+                scene: scene,
+                debug: false
+            })
         })
         
 
@@ -122,17 +138,17 @@ const Game: React.FC = () => {
             url: '/models/f22.glb',
             scale: 2.5,
             position: new THREE.Vector3(30.5, 6.05, 49.3),
-            rotation: {x: -180, y: -10.5, z: 180},
+            rotation: {x: -180, y: 79.5, z: -180},
         })
 
         f22.load().then(() => {
             f22.setHitbox({
                 dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 20, z: 49.3 },
+                position: { x: 30.5, y: 7, z: 49.3 },
                 rotation: { pitch: -180, yaw: -10.5, roll: 180 }
             })
             f22.lockHitbox()
-            f22.toggleHitboxVisibility(true)
+            f22.toggleHitboxVisibility(false)
             f22.makeSolid(true, false)
             f22Ref.current = f22.wrapper
         })
@@ -145,7 +161,7 @@ const Game: React.FC = () => {
             domElement: container,
             camSensitivity: 0.002,
             //camDefaultOffset: new THREE.Vector3(-20, 2, 0)
-            camDefaultOffset: new THREE.Vector3(-15, 2, 0)
+            camDefaultOffset: new THREE.Vector3(0, 2, -15)
         })
 
 
