@@ -2,6 +2,7 @@
 
 import * as THREE from 'three'
 import { RenderModel, RenderModelParams } from '../RenderModel'
+import { SolidBody } from '../physics/SolidBody';
 
 export interface HitboxParams {
     dimensions: { length: number; width: number; height: number }
@@ -55,6 +56,16 @@ export class RenderPlane extends RenderModel {
         return this.model
     }
 
+    makeSolid(dynamic: boolean) {
+        if (this.solid) return;
+        this.wrapper.updateWorldMatrix(true, false)
+
+        this.solid = new SolidBody({
+            model: this.wrapper,
+            dynamic: dynamic
+        })
+    }
+
     setHitbox(params: HitboxParams) {
         const { length, width, height } = params.dimensions
         const { x, y, z } = params.position
@@ -89,11 +100,11 @@ export class RenderPlane extends RenderModel {
     lockHitbox() {
         if (!this.model || !this.hitboxConfigured) return
 
-        this.wrapper.parent?.attach(this.model)
+        this.params.scene.attach(this.model)
         this.wrapper.attach(this.model)
 
-        //this.model.position.set(0, 0, 0)
-        //this.model.rotation.set(0, 0, 0)
+        this.model.position.set(0, 0, 0)
+        this.model.rotation.set(0, 0, 0)
         this.helper.update()
     }
 
@@ -127,6 +138,11 @@ export class RenderPlane extends RenderModel {
     update(delta: number) {
         this.mixer?.update(delta)
         this.helper?.update()
+    }
+
+    updatePhysics() {
+        this.solid?.updatePhysics()
+        this.helper.update()
     }
 
     get position() {

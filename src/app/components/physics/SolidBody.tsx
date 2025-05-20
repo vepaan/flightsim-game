@@ -5,13 +5,13 @@ import RAPIER from '@dimforge/rapier3d-compat'
 import { getPhysicsWorld } from './PhysicsWorld'
 
 export interface SolidBodyParams {
-    model: THREE.Group
+    model: THREE.Object3D
     dynamic: boolean
 }
 
 export class SolidBody {
 
-    private model: THREE.Group
+    private model: THREE.Object3D
     private dynamic: boolean
     private body: RAPIER.RigidBody | undefined
     private colliders: RAPIER.ColliderDesc[] = []
@@ -26,13 +26,13 @@ export class SolidBody {
         const world = getPhysicsWorld()
 
         const boundingBox = new THREE.Box3().setFromObject(this.model)
-        const dimensions = new THREE.Vector3();
-        boundingBox.getSize(dimensions);
+        const dimensions = new THREE.Vector3()
+        boundingBox.getSize(dimensions)
         
-        const center = new THREE.Vector3();
-        boundingBox.getCenter(center);
+        const center = new THREE.Vector3()
+        boundingBox.getCenter(center)
 
-        const halfExtents = dimensions.clone().multiplyScalar(0.5);
+        const halfExtents = dimensions.clone().multiplyScalar(0.5)
         
         const mainCollider = RAPIER.ColliderDesc
             .cuboid(
@@ -46,24 +46,24 @@ export class SolidBody {
                 center.z - this.model.position.z
             )
             .setFriction(0.7)
-            .setRestitution(0.2);
+            .setRestitution(0.2)
         
-        this.colliders.push(mainCollider);
+        this.colliders.push(mainCollider)
 
-        this.model.updateWorldMatrix(true, true);
+        this.model.updateWorldMatrix(true, true)
 
-        const worldPos = new THREE.Vector3();
-        const worldQuat = new THREE.Quaternion();
+        const worldPos = new THREE.Vector3()
+        const worldQuat = new THREE.Quaternion()
 
-        this.model.getWorldPosition(worldPos);
-        this.model.getWorldQuaternion(worldQuat);
+        this.model.getWorldPosition(worldPos)
+        this.model.getWorldQuaternion(worldQuat)
 
         let bodyDesc;
         if (this.dynamic) {
             bodyDesc = RAPIER.RigidBodyDesc.dynamic()
                 .setCcdEnabled(true)
         } else {
-            bodyDesc = RAPIER.RigidBodyDesc.fixed();
+            bodyDesc = RAPIER.RigidBodyDesc.fixed()
         }
 
         bodyDesc.setTranslation(worldPos.x, worldPos.y, worldPos.z)
@@ -72,9 +72,11 @@ export class SolidBody {
                 y: worldQuat.y,
                 z: worldQuat.z,
                 w: worldQuat.w
-            });
+            })
+            .setLinearDamping(0.1)  // Add damping to make movement more stable
+            .setAngularDamping(0.1); // Reduce spinning
 
-        this.body = world.createRigidBody(bodyDesc);
+        this.body = world.createRigidBody(bodyDesc)
         
         this.colliders.forEach(cd => 
             world.createCollider(cd, this.body)

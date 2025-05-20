@@ -85,11 +85,10 @@ const Game: React.FC = () => {
             scale: 0.1,
             position: new THREE.Vector3(28, -4, 11), // -4 for 10
             rotation: {x: 0, y: 0, z: 0},
-            isSolid: true,
-            dynamic: false
         })
         
         aircraftCarrier.load().then((model) => {
+            aircraftCarrier.makeSolid(false)
             aircraftCarrierRef.current = model
         })
         
@@ -102,8 +101,6 @@ const Game: React.FC = () => {
             scale: 0.05,
             position: new THREE.Vector3(30.49, 6.61, 49.27),
             rotation: {x: -175.72, y: 79.67, z: 177.61},
-            isSolid: true,
-            dynamic: false
         })
 
         mig29.load().then(() => {
@@ -126,18 +123,17 @@ const Game: React.FC = () => {
             scale: 2.5,
             position: new THREE.Vector3(30.5, 6.05, 49.3),
             rotation: {x: -180, y: -10.5, z: 180},
-            isSolid: true,
-            dynamic: true
         })
 
         f22.load().then(() => {
             f22.setHitbox({
                 dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 6.05, z: 49.3 },
-                rotation: { pitch: -180, yaw: 79.5, roll: 180 }
+                position: { x: 30.5, y: 100.05, z: 49.3 },
+                rotation: { pitch: -180, yaw: -10.5, roll: 180 }
             })
             f22.lockHitbox()
             f22.toggleHitboxVisibility(true)
+            f22.makeSolid(true)
             f22Ref.current = f22.wrapper
         })
 
@@ -168,8 +164,8 @@ const Game: React.FC = () => {
             const delta = clock.getDelta()
 
             stepPhysics(delta)
-            f22.solid?.updatePhysics()
-            aircraftCarrier.solid?.updatePhysics()
+            f22.updatePhysics()
+            aircraftCarrier.updatePhysics()
 
             if (IS_DEV_MODE) {
                 orbitControls?.update()

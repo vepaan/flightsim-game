@@ -10,8 +10,6 @@ export interface RenderModelParams {
     scale?: number
     position?: THREE.Vector3
     rotation?: { x?: number; y?: number; z?: number } // in degrees
-    isSolid: boolean
-    dynamic: boolean
 }
 
 export class RenderModel {
@@ -31,8 +29,6 @@ export class RenderModel {
             scale = 1,
             position = new THREE.Vector3(),
             rotation = { x: 0, y: 0, z: 0 },
-            isSolid,
-            dynamic
         } = this.params
 
         return new Promise((resolve, reject) => {
@@ -62,12 +58,6 @@ export class RenderModel {
                     scene.add(model)
                     this.model = model
 
-                    if (this.params.isSolid) {
-                        this.solid = new SolidBody({
-                            model: this.model,
-                            dynamic: this.params.dynamic
-                        })
-                    }
 
                     resolve(model)
                     console.log("Model resolved", url)
@@ -135,5 +125,22 @@ export class RenderModel {
         action.reset()
         action.setEffectiveTimeScale(speed)
         action.play()
+    }
+
+    makeSolid(dynamic: boolean) {
+        if (this.solid) return
+        this.solid = new SolidBody({
+            model: this.model,
+            dynamic: dynamic
+        })
+    }
+
+    getSolid() {
+        return this.solid
+    }
+
+    updatePhysics() {
+        if (!this.solid) return
+        this.solid.updatePhysics()
     }
 }
