@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { RenderPlane } from './RenderPlane'
 import { PlaneCameraRig } from './PlaneCameraRig'
 import { PlaneAnimations } from './PlaneAnimations'
+import { FlightBody } from '../physics/FlightBody'
 
 export interface PlaneControlsParams {
     plane: RenderPlane
@@ -21,6 +22,7 @@ class MouseDelta {
 export class PlaneControls {
 
     private plane: RenderPlane
+    private planeBody: FlightBody | undefined
     private camera: THREE.Camera
     private domElement: HTMLElement
     private speed = 50
@@ -39,6 +41,7 @@ export class PlaneControls {
     
     constructor(params: PlaneControlsParams) {
         this.plane = params.plane
+        
         this.camera = params.camera
         this.domElement = params.domElement
 
@@ -54,6 +57,10 @@ export class PlaneControls {
             this.animator = new PlaneAnimations({
                 plane: this.plane
             })
+        })
+
+        this.plane.solidReady.then(() => {
+            this.planeBody = this.plane.solid as FlightBody
         })
 
         this.bindInput()
@@ -194,8 +201,8 @@ export class PlaneControls {
             this.processRoll()
         }
 
-        if (this.keysPressed.has('w')) this.plane.moveForward(move)
-        if (this.keysPressed.has('s')) this.plane.moveBackward(move)
+        if (this.keysPressed.has('w')) this.moveForward(move)
+        if (this.keysPressed.has('s')) this.moveBackward(move)
 
 
         // executes for a or d is pressed
@@ -215,6 +222,22 @@ export class PlaneControls {
 
         this.plane.mixer?.update(delta)
         this.updateCamera()
+    }
+
+    // CONTROLS
+
+    moveForward(move: number) {
+        if (this.planeBody) {
+            this.planeBody.moveForward(move)
+        } else {
+            console.log("not working")
+        }
+    }
+
+    moveBackward(move: number) {
+        if (this.planeBody) {
+            this.planeBody.moveBackward(move)
+        }
     }
 }
 

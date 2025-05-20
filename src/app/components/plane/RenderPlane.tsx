@@ -3,6 +3,7 @@
 import * as THREE from 'three'
 import { RenderModel, RenderModelParams } from '../RenderModel'
 import { SolidBody } from '../physics/SolidBody';
+import { FlightBody } from '../physics/FlightBody';
 
 export interface HitboxParams {
     dimensions: { length: number; width: number; height: number }
@@ -12,12 +13,14 @@ export interface HitboxParams {
 
 export class RenderPlane extends RenderModel {
     public ready: Promise<void>
+    public solidReady: Promise<void>
     public wrapper: THREE.Group
     private helper: THREE.BoxHelper
     private axes: THREE.AxesHelper
     private hitboxConfigured: boolean = false
 
     private resolveReady!: () => void
+    private resolveSolidReady!: () => void
 
     constructor(params: RenderModelParams) {
         super(params)
@@ -32,6 +35,7 @@ export class RenderPlane extends RenderModel {
         params.scene.add(this.helper)
 
         this.ready = new Promise(res => { this.resolveReady = res })
+        this.solidReady = new Promise(res => { this.resolveSolidReady = res })
     }
 
     async load(): Promise<THREE.Group> {
@@ -60,12 +64,15 @@ export class RenderPlane extends RenderModel {
         if (this.solid) return;
         this.wrapper.updateWorldMatrix(true, false)
 
-        this.solid = new SolidBody({
+        this.solid = new FlightBody({
             model: this.wrapper,
+            helper: this.helper,
             dynamic: dynamic,
             debug: debug,
             complex: complex
         })
+
+        this.resolveSolidReady()
     }
 
     setHitbox(params: HitboxParams) {
@@ -122,18 +129,6 @@ export class RenderPlane extends RenderModel {
 
     setPosition(pos: THREE.Vector3) {
         this.wrapper.position.copy(pos)
-        this.helper.update()
-    }
-
-    moveForward(thrust: number) {
-        const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.wrapper.quaternion)
-        this.solid?.applyImpulse(dir.multiplyScalar(thrust))
-        this.helper.update()
-    }
-
-    moveBackward(thrust: number) {
-        const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(this.wrapper.quaternion)
-        this.solid?.applyImpulse(dir.multiplyScalar(thrust))
         this.helper.update()
     }
 
