@@ -12,7 +12,7 @@ import { PlaneControls } from './plane/PlaneControls'
 import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
-const IS_DEV_MODE = false
+const IS_DEV_MODE = true
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -101,10 +101,10 @@ const Game: React.FC = () => {
                 x: 12,
                 y: 0.05,
                 z: 52,
-                position: new THREE.Vector3(28, 5.6, 5),
-                rotation: new THREE.Euler(0, 0, 0),
+                position: new THREE.Vector3(28, 6.25, 5),
+                rotation: new THREE.Euler(0.015, 0, 0),
                 scene: scene,
-                debug: false
+                debug: true
             })
         })
         
