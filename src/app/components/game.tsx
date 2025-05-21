@@ -74,7 +74,7 @@ const Game: React.FC = () => {
             x: 2000,
             y: 0.1,
             z: 2000,
-            position: new THREE.Vector3(0, 0, 0),
+            position: new THREE.Vector3(0, -1, 0),
             rotation: new THREE.Euler(0, 0, 0),
             scene: scene,
             debug: false

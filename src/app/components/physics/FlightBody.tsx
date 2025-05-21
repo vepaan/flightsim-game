@@ -20,14 +20,16 @@ export class FlightBody extends SolidBody {
 
     private plane: THREE.Object3D
     private helper: THREE.BoxHelper
-    private wingArea!: number
-    private liftCoefficient!: number
-    private dragCoefficient!: number
-    private thrustStrength!: number
-    private torqueStrength!: number
+    private wingArea: number = 10
+    private liftCoefficient: number = 0.5
+    private dragCoefficient: number = 0.02
+    private thrustStrength: number = 10
+    private torqueStrength: number = 1
+    private yawStrength: number = 2
 
     constructor(params: FlightBodyParams) {
         super(params)
+
         this.plane = params.model
         this.helper = params.helper
         
@@ -43,7 +45,9 @@ export class FlightBody extends SolidBody {
                 this.dragCoefficient = res.dragCoefficient
                 this.thrustStrength = res.thrustStrength
                 this.torqueStrength = res.torqueStrength
+                this.yawStrength = res.yawStrength
             })
+            .catch(() => {})
         }
 
     async fetchFlightSpecs(info: string): Promise<{
@@ -51,7 +55,8 @@ export class FlightBody extends SolidBody {
         liftCoefficient: number,
         dragCoefficient: number,
         thrustStrength: number,
-        torqueStrength: number
+        torqueStrength: number,
+        yawStrength: number
     }> {
         try {
             const res = await fetch(info);
@@ -64,7 +69,8 @@ export class FlightBody extends SolidBody {
                 liftCoefficient: 0.5,
                 dragCoefficient: 0.02,
                 thrustStrength: 10,
-                torqueStrength: 1
+                torqueStrength: 1,
+                yawStrength: 2,
             };
         }
     }
@@ -81,4 +87,33 @@ export class FlightBody extends SolidBody {
         this.helper.update()
     }
 
+    yawRight() {
+        const dir = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.plane.quaternion)
+        this.applyImpulse(dir.multiplyScalar(this.yawStrength))
+        this.helper.update()
+    }
+
+    yawLeft() {
+        const dir = new THREE.Vector3(1, 0, 0).applyQuaternion(this.plane.quaternion)
+        this.applyImpulse(dir.multiplyScalar(this.yawStrength))
+        this.helper.update()
+    }
+
+    processPitch(input: number) {
+
+        const pitchAxis = new THREE.Vector3(-1, 0, 0)
+            .applyQuaternion(this.plane.quaternion)
+
+        const mag = this.torqueStrength * input
+        console.log("magnitue is ", mag, input)
+
+        this.applyTorqueImpulse(
+            new THREE.Vector3(
+                pitchAxis.x * mag,
+                pitchAxis.y * mag,
+                pitchAxis.z * mag )
+        );
+
+        this.helper.update();
+    }
 }

@@ -116,26 +116,6 @@ export class PlaneControls {
     }
 
 
-    // FUNDAMENTAL AXES CONTROLS
-
-    private rotatePitch(degrees: number) {
-        const delta = THREE.MathUtils.degToRad(degrees)
-        this.plane.applyRotation(delta, 0, 0) // pitch = x
-        this.planeCamera.accumulateCameraRotation(0, 0, delta)
-    }
-
-    private rotateYaw(degrees: number) {
-        const delta = THREE.MathUtils.degToRad(degrees)
-        this.plane.applyRotation(0, delta, 0) // yaw = y
-        this.planeCamera.accumulateCameraRotation(delta, 0, 0)
-    }
-
-    private rotateRoll(degrees: number) {
-        const delta = THREE.MathUtils.degToRad(degrees)
-        this.plane.applyRotation(0, 0, delta) // roll = z
-        this.planeCamera.accumulateCameraRotation(0, delta, 0)
-    }
-
 
     public updateCamera() {
         this.planeCamera.updateCamera()
@@ -155,6 +135,11 @@ export class PlaneControls {
     }
 
     private processPitch() {
+        const sensitivity = this.planeCamera.getSensitivity()
+        const deltaPitch = this.mouseDelta.dy * sensitivity
+
+        this.planeBody?.processPitch(THREE.MathUtils.clamp(deltaPitch / this.domElement.clientHeight, -1, 1))
+
         this.animator?.processLeftElevator(this.mouseDelta.dy)
         this.animator?.processRightElevator(this.mouseDelta.dy)
         this.mouseDelta.dy = 0 // to pause curr anim if mouse stops moving
@@ -164,10 +149,10 @@ export class PlaneControls {
         let rudderDelta = 0
 
         if (this.keysPressed.has('a')) {
-            this.rotateYaw(1)
+            this.planeBody?.yawLeft()
             if (this.animator) rudderDelta = this.animator?.rudder.getDragMax()
         } else if (this.keysPressed.has('d')) {
-            this.rotateYaw(-1)
+            this.planeBody?.yawRight()
             if (this.animator) rudderDelta = -this.animator?.rudder.getDragMax()
         } else {
             if (!this.animator) return
@@ -194,7 +179,7 @@ export class PlaneControls {
 
         if (!this.planeCamera.isDraggingMouse()) {
             // normal plane cam
-            this.plane.applyRotation(deltaPitch, 0, deltaRoll)
+            //this.plane.applyRotation(deltaPitch, 0, deltaRoll)
             this.processPitch(); 
             this.processRoll()
         }
