@@ -126,11 +126,6 @@ export class PlaneControls {
 
     private toggleLandingGear() {
         this.animator?.toggleLandingGear(this.landingGearDown)
-        if (this.landingGearDown) {
-            this.planeBody?.adjustColliderBottom(-0.3)
-        } else {
-            this.planeBody?.adjustColliderBottom(0.3)
-        }
         this.landingGearDown = !this.landingGearDown
     }
 

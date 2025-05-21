@@ -1,9 +1,9 @@
 {
-  "mass": 200,
-  "wingArea": 20,
-  "liftCoefficient": 0.75,
-  "dragCoefficient": 0.03,
-  "thrustStrength": 50,
-  "torqueStrength": 50,
-  "yawStrength": 10
+  "mass": 38000,
+  "wingArea": 80,
+  "liftCoefficient": 1.338,
+  "dragCoefficient": 0.0124,
+  "thrustStrength": 31200,
+  "torqueStrength": 54000,
+  "yawStrength": 54000
 }

@@ -16,7 +16,7 @@ export class SolidBody {
     public model: THREE.Object3D
     public mass?: number
     public dynamic: boolean
-    private debug: boolean
+    public debug: boolean
     public body: RAPIER.RigidBody | undefined
     public simpleColliders: RAPIER.ColliderDesc[] = []
 
@@ -55,9 +55,9 @@ export class SolidBody {
 
         const mainCollider = RAPIER.ColliderDesc
             .cuboid(
-                halfExtents.x * 1.05, 
-                halfExtents.y * 1.05, 
-                halfExtents.z * 1.05
+                halfExtents.x, 
+                halfExtents.y, 
+                halfExtents.z
             )
             .setTranslation(
                 localCenter.x,

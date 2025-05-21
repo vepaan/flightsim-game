@@ -18,6 +18,11 @@ export interface FlightInputs {
 
 export class FlightBody extends SolidBody {
 
+    private bottomDesc?: RAPIER.ColliderDesc
+    private bottomCol?: RAPIER.Collider
+    private topDesc?: RAPIER.ColliderDesc
+    private topCol?: RAPIER.Collider
+
     private plane: THREE.Object3D
     private wingArea: number = 10
     private liftCoefficient: number = 0.5
@@ -73,7 +78,7 @@ export class FlightBody extends SolidBody {
         } catch (err) {
             console.error("Failed to load info");
             return {
-                mass: 1000,
+                mass: 10,
                 wingArea: 10,
                 liftCoefficient: 0.5,
                 dragCoefficient: 0.02,
@@ -84,62 +89,6 @@ export class FlightBody extends SolidBody {
         }
     }
 
-    adjustColliderBottom(value: number) {
-        if (!this.body) return;
-        const world = getPhysicsWorld();
-
-        if (this._halfExtents === null) {
-            const bbox = new THREE.Box3().setFromObject(this.plane);
-            const size = bbox.getSize(new THREE.Vector3());
-            this._halfExtents = size.multiplyScalar(0.5);
-
-            const worldCenter = bbox.getCenter(new THREE.Vector3());
-            const localCenter = worldCenter.clone();
-            this.plane.worldToLocal(localCenter);
-
-            this._bottomLocalY = localCenter.y - this._halfExtents.y;
-        }
-
-        this._bottomLocalY! -= value
-
-        const newCenterY = this._bottomLocalY! + this._halfExtents!.y;
-
-        world.removeRigidBody(this.body);
-        this.body = undefined;
-        for (const c of (this as any)._colliders as RAPIER.Collider[]) {
-            world.removeCollider(c, true);
-        }
-        (this as any)._colliders = [];
-
-        const worldPos  = new THREE.Vector3();
-        const worldQuat= new THREE.Quaternion();
-        this.plane.getWorldPosition(worldPos);
-        this.plane.getWorldQuaternion(worldQuat);
-
-        const rbDesc = this.dynamic
-            ? RAPIER.RigidBodyDesc.dynamic().setCcdEnabled(true)
-            : RAPIER.RigidBodyDesc.fixed();
-        rbDesc
-            .setTranslation(worldPos.x, worldPos.y, worldPos.z)
-            .setRotation({x:worldQuat.x, y:worldQuat.y, z:worldQuat.z, w:worldQuat.w})
-            .setLinearDamping(0.1)
-            .setAngularDamping(0.1);
-
-        this.body = world.createRigidBody(rbDesc);
-
-        const cd = RAPIER.ColliderDesc.cuboid(
-            this._halfExtents!.x,
-            this._halfExtents!.y,
-            this._halfExtents!.z
-        )
-            .setTranslation(0, newCenterY, 0)
-            .setFriction(0.7)
-            .setRestitution(0.2)
-            .setDensity(1);
-
-        const newCol = world.createCollider(cd, this.body);
-        (this as any)._colliders.push(newCol);
-    }
 
     // CONTROLS
 
@@ -149,7 +98,6 @@ export class FlightBody extends SolidBody {
 
     moveForward() {
         const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.plane.quaternion)
-        console.log(dir)
         this.applyImpulse(dir.multiplyScalar(this.thrustStrength))
     }
 
