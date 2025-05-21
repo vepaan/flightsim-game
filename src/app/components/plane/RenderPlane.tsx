@@ -2,7 +2,6 @@
 
 import * as THREE from 'three'
 import { RenderModel, RenderModelParams } from '../RenderModel'
-import { SolidBody } from '../physics/SolidBody';
 import { FlightBody } from '../physics/FlightBody';
 
 export interface HitboxParams {
@@ -25,6 +24,8 @@ export class RenderPlane extends RenderModel {
     constructor(params: RenderModelParams) {
         super(params)
         this.wrapper = new THREE.Group()
+
+        this.info = params.info
 
         this.axes = new THREE.AxesHelper(2)
         this.wrapper.add(this.axes)
@@ -66,6 +67,7 @@ export class RenderPlane extends RenderModel {
 
         this.solid = new FlightBody({
             model: this.wrapper,
+            info: this.info,
             helper: this.helper,
             dynamic: dynamic,
             debug: debug,

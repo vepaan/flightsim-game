@@ -7,6 +7,7 @@ export interface RenderModelParams {
     scene: THREE.Scene
     loader: THREE.Loader
     url: string
+    info?: string
     scale?: number
     position?: THREE.Vector3
     rotation?: { x?: number; y?: number; z?: number } // in degrees
@@ -17,6 +18,7 @@ export class RenderModel {
     public model!: THREE.Group
     public mixer?: THREE.AnimationMixer
     public solid?: SolidBody
+    public info?: string
     public animations: Record<string, THREE.AnimationClip> = {}
 
     constructor(public params: RenderModelParams) {}
@@ -26,6 +28,7 @@ export class RenderModel {
             scene,
             loader,
             url,
+            info,
             scale = 1,
             position = new THREE.Vector3(),
             rotation = { x: 0, y: 0, z: 0 },

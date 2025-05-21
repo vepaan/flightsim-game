@@ -25,7 +25,6 @@ export class PlaneControls {
     private planeBody: FlightBody | undefined
     private camera: THREE.Camera
     private domElement: HTMLElement
-    private speed = 50
 
     private planeCamera: PlaneCameraRig
 
@@ -189,7 +188,6 @@ export class PlaneControls {
     // TICK/UPDATE FUNCTION
 
     update(delta: number) {
-        const move = this.speed
         const sensitivity = this.planeCamera.getSensitivity()
         const deltaRoll = this.mouseDelta.dx * sensitivity
         const deltaPitch = this.mouseDelta.dy * sensitivity
@@ -201,8 +199,8 @@ export class PlaneControls {
             this.processRoll()
         }
 
-        if (this.keysPressed.has('w')) this.moveForward(move)
-        if (this.keysPressed.has('s')) this.moveBackward(move)
+        if (this.keysPressed.has('w')) this.moveForward()
+        if (this.keysPressed.has('s')) this.moveBackward()
 
 
         // executes for a or d is pressed
@@ -226,17 +224,19 @@ export class PlaneControls {
 
     // CONTROLS
 
-    moveForward(move: number) {
+    moveForward() {
         if (this.planeBody) {
-            this.planeBody.moveForward(move)
+            this.planeBody.moveForward()
         } else {
             console.log("not working")
         }
     }
 
-    moveBackward(move: number) {
+    moveBackward() {
         if (this.planeBody) {
-            this.planeBody.moveBackward(move)
+            this.planeBody.moveBackward()
+        } else {
+            console.log("not working")
         }
     }
 }

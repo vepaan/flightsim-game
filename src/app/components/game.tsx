@@ -12,7 +12,7 @@ import { PlaneControls } from './plane/PlaneControls'
 import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
-const IS_DEV_MODE = true
+const IS_DEV_MODE = false
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -99,12 +99,12 @@ const Game: React.FC = () => {
             aircraftCarrierRef.current = model
             createGround({
                 x: 12,
-                y: 0.05,
+                y: 0.01,
                 z: 52,
-                position: new THREE.Vector3(28, 6.25, 5),
-                rotation: new THREE.Euler(0.015, 0, 0),
+                position: new THREE.Vector3(28, 5.85, 5),
+                rotation: new THREE.Euler(0.005, 0, 0),
                 scene: scene,
-                debug: true
+                debug: false
             })
         })
         
@@ -136,6 +136,7 @@ const Game: React.FC = () => {
             scene: scene,
             loader: loader,
             url: '/models/f22.glb',
+            info: '/info/f22.json',
             scale: 2.5,
             position: new THREE.Vector3(30.5, 6.05, 49.3),
             rotation: {x: -180, y: 79.5, z: -180},
