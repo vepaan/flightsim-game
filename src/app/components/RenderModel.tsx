@@ -135,9 +135,9 @@ export class RenderModel {
         this.solid = new SolidBody({
             model: this.model,
             dynamic: dynamic,
-            debug: debug,
-            complex: complex
+            debug: debug
         })
+        this.solid.createSimpleSolid()
     }
 
     getSolid() {

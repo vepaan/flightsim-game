@@ -140,7 +140,7 @@ const Game: React.FC = () => {
         f22.load().then(() => {
             f22.setHitbox()
             f22.toggleHitboxVisibility(false)
-            f22.makeSolid(true, true, false)
+            f22.makeSolid(true, true)
             f22Ref.current = f22.wrapper
         })
 

@@ -26,6 +26,8 @@ export class FlightBody extends SolidBody {
     private torqueStrength: number = 1
     private yawStrength: number = 2
 
+    private airDensity: number = 1.225
+
     private _halfExtents: THREE.Vector3 | null = null;
     private _bottomLocalY: number | null   = null;
 
@@ -41,6 +43,7 @@ export class FlightBody extends SolidBody {
 
         this.fetchFlightSpecs(params.info)
             .then(res => {
+                this.mass = res.mass
                 this.wingArea = res.wingArea
                 this.liftCoefficient = res.liftCoefficient
                 this.dragCoefficient = res.dragCoefficient
@@ -49,9 +52,13 @@ export class FlightBody extends SolidBody {
                 this.yawStrength = res.yawStrength
             })
             .catch(() => {})
-        }
+            .finally(() => {
+                this.createSimpleSolid()
+            })
+    }
 
     async fetchFlightSpecs(info: string): Promise<{
+        mass: number,
         wingArea: number,
         liftCoefficient: number,
         dragCoefficient: number,
@@ -66,6 +73,7 @@ export class FlightBody extends SolidBody {
         } catch (err) {
             console.error("Failed to load info");
             return {
+                mass: 1000,
                 wingArea: 10,
                 liftCoefficient: 0.5,
                 dragCoefficient: 0.02,
@@ -135,6 +143,10 @@ export class FlightBody extends SolidBody {
 
     // CONTROLS
 
+    updateAerodynamics(delta: number) {
+
+    }
+
     moveForward() {
         const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.plane.quaternion)
         console.log(dir)
@@ -162,7 +174,7 @@ export class FlightBody extends SolidBody {
         const pitchAxis = new THREE.Vector3(-1, 0, 0)
             .applyQuaternion(this.plane.quaternion)
 
-        const mag = 1000000 * this.torqueStrength * input
+        const mag = this.torqueStrength * input
         console.log("magnitue is ", mag, input)
 
         this.applyTorqueImpulse(

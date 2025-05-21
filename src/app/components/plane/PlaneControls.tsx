@@ -140,14 +140,13 @@ export class PlaneControls {
     }
 
     private processPitch() {
-        const sensitivity = this.planeCamera.getSensitivity()
-        const deltaPitch = this.mouseDelta.dy * sensitivity
+        const input = this.mouseDelta.dy
 
-        this.planeBody?.processPitch(THREE.MathUtils.clamp(deltaPitch / this.domElement.clientHeight, -1, 1))
+        this.planeBody?.processPitch(input)
 
-        this.animator?.processLeftElevator(this.mouseDelta.dy)
-        this.animator?.processRightElevator(this.mouseDelta.dy)
-        this.mouseDelta.dy = 0 // to pause curr anim if mouse stops moving
+        this.animator?.processLeftElevator(input)
+        this.animator?.processRightElevator(input)
+        this.mouseDelta.dy = 0
     }
 
     private processYaw() {
