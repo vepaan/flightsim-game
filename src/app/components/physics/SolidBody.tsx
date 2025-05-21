@@ -33,6 +33,7 @@ export class SolidBody {
 
     private createSimpleSolid() {
         const world = getPhysicsWorld()
+        this.simpleColliders = []
 
         const boundingBox = new THREE.Box3().setFromObject(this.model)
         const dimensions = new THREE.Vector3()
@@ -98,6 +99,7 @@ export class SolidBody {
 
     private createComplexSolid() {
         const world = getPhysicsWorld()
+        this.complexColliders = []
         
         // First create the rigid body
         this.model.updateWorldMatrix(true, true)
