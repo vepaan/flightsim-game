@@ -4,36 +4,37 @@ import * as THREE from 'three'
 import { RenderModel, RenderModelParams } from '../RenderModel'
 import { FlightBody } from '../physics/FlightBody';
 
-export interface HitboxParams {
-    dimensions: { length: number; width: number; height: number }
-    position: { x: number; y: number; z: number }
-    rotation: { pitch: number; yaw: number; roll: number }
-}
-
 export class RenderPlane extends RenderModel {
     public ready: Promise<void>
     public solidReady: Promise<void>
     public wrapper: THREE.Group
-    private helper: THREE.BoxHelper
+    private visual: THREE.Group
+    private hitboxMesh?: THREE.LineSegments
     private axes: THREE.AxesHelper
-    private hitboxConfigured: boolean = false
-
+    
     private resolveReady!: () => void
     private resolveSolidReady!: () => void
 
     constructor(params: RenderModelParams) {
         super(params)
-        this.wrapper = new THREE.Group()
-
         this.info = params.info
 
-        this.axes = new THREE.AxesHelper(2)
-        this.wrapper.add(this.axes)
-
-        this.helper = new THREE.BoxHelper(this.wrapper, 0xffff00)
-
+        this.wrapper = new THREE.Group()
+        if (params?.position) this.wrapper.position.copy(params.position)
+            if (params?.rotation) {
+            this.wrapper.rotation.set(
+                THREE.MathUtils.degToRad(params.rotation?.x ?? 0),
+                THREE.MathUtils.degToRad(params.rotation.y ?? 0),
+                THREE.MathUtils.degToRad(params.rotation.z ?? 0)
+            )
+        }
         params.scene.add(this.wrapper)
-        params.scene.add(this.helper)
+
+        this.visual = new THREE.Group()
+        this.wrapper.add(this.visual)
+
+        this.axes = new THREE.AxesHelper(2)
+        this.visual.add(this.axes)
 
         this.ready = new Promise(res => { this.resolveReady = res })
         this.solidReady = new Promise(res => { this.resolveSolidReady = res })
@@ -42,7 +43,12 @@ export class RenderPlane extends RenderModel {
     async load(): Promise<THREE.Group> {
         this.model = await super.load()
 
-        this.resolveReady()
+        this.params.scene.remove(this.model)
+
+        this.model.position.set(0,0,0)
+        this.model.quaternion.set(0,0,0,1)
+
+        this.visual.add(this.model)
 
         // if not alr in geardown, make it geardown
         if (this.mixer) {
@@ -58,6 +64,7 @@ export class RenderPlane extends RenderModel {
             }
         }
 
+        this.resolveReady()
         return this.model
     }
 
@@ -68,7 +75,6 @@ export class RenderPlane extends RenderModel {
         this.solid = new FlightBody({
             model: this.wrapper,
             info: this.info,
-            helper: this.helper,
             dynamic: dynamic,
             debug: debug,
             complex: complex
@@ -77,47 +83,35 @@ export class RenderPlane extends RenderModel {
         this.resolveSolidReady()
     }
 
-    setHitbox(params: HitboxParams) {
-        const { length, width, height } = params.dimensions
-        const { x, y, z } = params.position
-        const { pitch, yaw, roll } = params.rotation
+    setHitbox() {
+        if (this.hitboxMesh) {
+            this.visual.remove(this.hitboxMesh)
+            this.hitboxMesh.geometry.dispose()
+            if (Array.isArray(this.hitboxMesh.material)) {
+                this.hitboxMesh.material.forEach(mat => mat.dispose());
+            } else {
+                this.hitboxMesh.material.dispose();
+            }
+        }
 
-        this.wrapper.clear()
+        const bbox = new THREE.Box3().setFromObject(this.model)
+        const size = bbox.getSize(new THREE.Vector3());
+        const center = bbox.getCenter(new THREE.Vector3())
 
-        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(length, height, width),
-            new THREE.MeshBasicMaterial({
-                color: 0x00ff00,
-                wireframe: true,
-                opacity: 0.4,
-                transparent: true
-            })
-        )
+        const geo  = new THREE.BoxGeometry(size.x, size.y, size.z)
+        const edges = new THREE.EdgesGeometry(geo)
+        geo.dispose()
+        const mat = new THREE.LineBasicMaterial({ color: 0xffff00 })
+        const box = new THREE.LineSegments(edges, mat)
+        edges.dispose()
 
-        this.wrapper.add(cube)
-        this.wrapper.add(this.axes)
+        this.visual.worldToLocal(center)
+        box.position.copy(center)
 
-        this.wrapper.position.set(x, y, z)
-        this.wrapper.rotation.set(
-            THREE.MathUtils.degToRad(pitch),
-            THREE.MathUtils.degToRad(yaw),
-            THREE.MathUtils.degToRad(roll)
-        )
-
-        this.helper.update()
-        this.hitboxConfigured = true
+        this.visual.add(box)
+        this.hitboxMesh = box
     }
 
-    lockHitbox() {
-        if (!this.model || !this.hitboxConfigured) return
-
-        this.params.scene.attach(this.model)
-        this.wrapper.attach(this.model)
-
-        this.model.position.set(0, 0, 0)
-        this.model.rotation.set(0, 0, 0)
-        this.helper.update()
-    }
 
     setOrientation(pitch: number, yaw: number, roll: number) {
         const toRad = THREE.MathUtils.degToRad
@@ -126,22 +120,18 @@ export class RenderPlane extends RenderModel {
             toRad(yaw),
             toRad(roll)
         )
-        this.helper.update()
     }
 
     setPosition(pos: THREE.Vector3) {
         this.wrapper.position.copy(pos)
-        this.helper.update()
     }
 
     update(delta: number) {
         this.mixer?.update(delta)
-        this.helper?.update()
     }
 
     updatePhysics() {
         this.solid?.updatePhysics()
-        this.helper.update()
     }
 
     get position() {
@@ -156,20 +146,10 @@ export class RenderPlane extends RenderModel {
         return this.wrapper.quaternion
     }
 
-    toggleHitboxVisibility(visible?: boolean) {
-        if (typeof visible === 'boolean') {
-            this.hitboxConfigured = visible
-        } else {
-            this.hitboxConfigured = !this.hitboxConfigured
-        }
-
-        this.wrapper.children.forEach(child => {
-            if (child instanceof THREE.Mesh || child instanceof THREE.AxesHelper) {
-                child.visible = this.hitboxConfigured
-            }
-        })
-
-        this.helper.visible = this.hitboxConfigured
+    toggleHitboxVisibility(visible = false) {
+        if (!this.hitboxMesh) return
+        this.hitboxMesh.visible = visible
+        this.axes.visible = visible
     }
 
     applyRotation(deltaPitch: number, deltaYaw: number, deltaRoll: number) {
@@ -181,8 +161,6 @@ export class RenderPlane extends RenderModel {
 
         // Roll around actual forward vector (+X)
         this.wrapper.rotateOnAxis(new THREE.Vector3(1, 0, 0), deltaRoll)
-
-        this.helper.update()
     }
 
     unload() {

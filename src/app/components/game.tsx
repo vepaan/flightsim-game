@@ -120,12 +120,7 @@ const Game: React.FC = () => {
         })
 
         mig29.load().then(() => {
-            mig29.setHitbox({
-                dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 6.6, z: 49.2 },
-                rotation: { pitch: -175.72, yaw: 79.67, roll: 177.61 }
-            })
-            mig29.lockHitbox()
+            mig29.setHitbox()
             mig29.toggleHitboxVisibility(false)
             mig29Ref.current = mig29.wrapper
             mig29.unload()
@@ -138,19 +133,14 @@ const Game: React.FC = () => {
             url: '/models/f22.glb',
             info: '/info/f22.json',
             scale: 2.5,
-            position: new THREE.Vector3(30.5, 6.05, 49.3),
-            rotation: {x: -180, y: 79.5, z: -180},
+            position: new THREE.Vector3(30.5, 10, 49.3),
+            rotation: {x: 0, y: 180, z: 0},
         })
 
         f22.load().then(() => {
-            f22.setHitbox({
-                dimensions: { length: 1, width: 2, height: 0.3 },
-                position: { x: 30.5, y: 7, z: 49.3 },
-                rotation: { pitch: -180, yaw: -10.5, roll: 180 }
-            })
-            f22.lockHitbox()
-            f22.toggleHitboxVisibility(false)
-            f22.makeSolid(true, false, false)
+            f22.setHitbox()
+            f22.toggleHitboxVisibility(true)
+            f22.makeSolid(true, true, false)
             f22Ref.current = f22.wrapper
         })
 

@@ -38,8 +38,11 @@ export class SolidBody {
         const dimensions = new THREE.Vector3()
         boundingBox.getSize(dimensions)
         
-        const center = new THREE.Vector3()
-        boundingBox.getCenter(center)
+        const worldCenter = new THREE.Vector3()
+        boundingBox.getCenter(worldCenter)
+
+        const localCenter = worldCenter.clone()
+        this.model.worldToLocal(localCenter)
 
         const halfExtents = dimensions.clone().multiplyScalar(0.5)
         
@@ -50,33 +53,15 @@ export class SolidBody {
                 halfExtents.z * 1.05
             )
             .setTranslation(
-                center.x - this.model.position.x,
-                center.y - this.model.position.y,
-                center.z - this.model.position.z
+                localCenter.x,
+                localCenter.y,
+                localCenter.z
             )
             .setFriction(0.7)
             .setRestitution(0.2)
             .setDensity(1)
         
         this.simpleColliders.push(mainCollider)
-
-        if (this.debug) {
-            const boxGeometry = new THREE.BoxGeometry(
-                halfExtents.x * 2 * 1.05, 
-                halfExtents.y * 2 * 1.05, 
-                halfExtents.z * 2 * 1.05
-            );
-            const boxMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00ff00,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
-            });
-            
-            const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-            boxMesh.position.copy(center.clone().sub(this.model.position));
-            this.model.add(boxMesh);
-        }
 
         this.model.updateWorldMatrix(true, true)
 

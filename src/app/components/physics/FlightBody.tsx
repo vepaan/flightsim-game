@@ -5,7 +5,6 @@ import RAPIER from '@dimforge/rapier3d-compat'
 import { SolidBody, SolidBodyParams } from './SolidBody'
 
 export interface FlightBodyParams extends SolidBodyParams {
-    helper: THREE.BoxHelper
     info: string | undefined
 }
 
@@ -19,7 +18,6 @@ export interface FlightInputs {
 export class FlightBody extends SolidBody {
 
     private plane: THREE.Object3D
-    private helper: THREE.BoxHelper
     private wingArea: number = 10
     private liftCoefficient: number = 0.5
     private dragCoefficient: number = 0.02
@@ -31,7 +29,6 @@ export class FlightBody extends SolidBody {
         super(params)
 
         this.plane = params.model
-        this.helper = params.helper
         
         if (!params.info) {
             console.error("Flight info not supplied in FlightBody constructor")
@@ -77,26 +74,23 @@ export class FlightBody extends SolidBody {
 
     moveForward() {
         const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.plane.quaternion)
+        console.log(dir)
         this.applyImpulse(dir.multiplyScalar(this.thrustStrength))
-        this.helper.update()
     }
 
     moveBackward() {
         const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(this.plane.quaternion)
         this.applyImpulse(dir.multiplyScalar(this.thrustStrength))
-        this.helper.update()
     }
 
     yawRight() {
         const dir = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.plane.quaternion)
         this.applyImpulse(dir.multiplyScalar(this.yawStrength))
-        this.helper.update()
     }
 
     yawLeft() {
         const dir = new THREE.Vector3(1, 0, 0).applyQuaternion(this.plane.quaternion)
         this.applyImpulse(dir.multiplyScalar(this.yawStrength))
-        this.helper.update()
     }
 
     processPitch(input: number) {
@@ -112,8 +106,6 @@ export class FlightBody extends SolidBody {
                 pitchAxis.x * mag,
                 pitchAxis.y * mag,
                 pitchAxis.z * mag )
-        );
-
-        this.helper.update();
+        )
     }
 }
