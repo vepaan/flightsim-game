@@ -146,14 +146,15 @@ export class FlightBody extends SolidBody {
         this.applyImpulse(dir.multiplyScalar(this.thrustStrength))
     }
 
-    yawRight() {
-        const dir = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.plane.quaternion)
-        this.applyImpulse(dir.multiplyScalar(this.yawStrength))
-    }
-
-    yawLeft() {
-        const dir = new THREE.Vector3(1, 0, 0).applyQuaternion(this.plane.quaternion)
-        this.applyImpulse(dir.multiplyScalar(this.yawStrength))
+    applyYaw(input: number) {
+        const up = new THREE.Vector3(0, 1, 0).applyQuaternion(this.plane.quaternion)
+        const mag = this.yawStrength * input
+        this.body?.applyTorqueImpulse(
+            { x: up.x * mag,
+            y: up.y * mag,
+            z: up.z * mag },
+            true 
+        )
     }
 
     processPitch(input: number) {

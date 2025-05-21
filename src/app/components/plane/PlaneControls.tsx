@@ -154,10 +154,10 @@ export class PlaneControls {
         let rudderDelta = 0
 
         if (this.keysPressed.has('a')) {
-            this.planeBody?.yawLeft()
+            this.planeBody?.applyYaw(1)
             if (this.animator) rudderDelta = this.animator?.rudder.getDragMax()
         } else if (this.keysPressed.has('d')) {
-            this.planeBody?.yawRight()
+            this.planeBody?.applyYaw(-1)
             if (this.animator) rudderDelta = -this.animator?.rudder.getDragMax()
         } else {
             if (!this.animator) return
