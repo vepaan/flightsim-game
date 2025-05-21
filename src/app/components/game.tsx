@@ -13,6 +13,8 @@ import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
 const IS_DEV_MODE = false
+const WORLD_LENGTH = 2000
+const WORLD_WIDTH = 2000
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
@@ -71,9 +73,9 @@ const Game: React.FC = () => {
         // PHYSICS
         await initPhysics()
         createGround({
-            x: 2000,
+            x: WORLD_LENGTH,
             y: 0.1,
-            z: 2000,
+            z: WORLD_WIDTH,
             position: new THREE.Vector3(0, -1, 0),
             rotation: new THREE.Euler(0, 0, 0),
             scene: scene,
@@ -158,7 +160,7 @@ const Game: React.FC = () => {
 
         // ENVIRONMENT
         const skySystem = setupRenderSky(scene, camera, timeOfDay)
-        const updateOcean = setupRenderOcean(scene, skySystem.primaryLight)
+        const updateOcean = setupRenderOcean(scene, skySystem.primaryLight, WORLD_LENGTH, WORLD_WIDTH)
 
 
         // ANIMATION LOOP

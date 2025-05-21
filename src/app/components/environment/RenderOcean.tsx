@@ -5,12 +5,12 @@ import { Water } from 'three/examples/jsm/objects/Water.js'
 
 const waterResolution = 1024
 const waterMovement = 1/200
-const terrainX = 2000
-const terrainY = 2000
 
 export function setupRenderOcean(
     scene: THREE.Scene,
-    primaryLightRef: { current: THREE.DirectionalLight}
+    primaryLightRef: { current: THREE.DirectionalLight},
+    terrainX: number,
+    terrainY: number
 ) {
     const primaryLight = primaryLightRef.current
 
