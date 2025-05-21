@@ -133,6 +133,8 @@ export class FlightBody extends SolidBody {
         (this as any)._colliders.push(newCol);
     }
 
+    // CONTROLS
+
     moveForward() {
         const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.plane.quaternion)
         console.log(dir)
@@ -159,7 +161,7 @@ export class FlightBody extends SolidBody {
         const pitchAxis = new THREE.Vector3(-1, 0, 0)
             .applyQuaternion(this.plane.quaternion)
 
-        const mag = this.torqueStrength * input
+        const mag = 1000000 * this.torqueStrength * input
         console.log("magnitue is ", mag, input)
 
         this.applyTorqueImpulse(

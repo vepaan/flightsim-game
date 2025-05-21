@@ -133,13 +133,13 @@ const Game: React.FC = () => {
             url: '/models/f22.glb',
             info: '/info/f22.json',
             scale: 2.5,
-            position: new THREE.Vector3(28, 10, 49),
+            position: new THREE.Vector3(28, 7, 49),
             rotation: {x: 0, y: 180, z: 0},
         })
 
         f22.load().then(() => {
             f22.setHitbox()
-            f22.toggleHitboxVisibility(true)
+            f22.toggleHitboxVisibility(false)
             f22.makeSolid(true, true, false)
             f22Ref.current = f22.wrapper
         })
