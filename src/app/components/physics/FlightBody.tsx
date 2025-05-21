@@ -3,6 +3,7 @@
 import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { SolidBody, SolidBodyParams } from './SolidBody'
+import { getPhysicsWorld } from './PhysicsWorld'
 
 export interface FlightBodyParams extends SolidBodyParams {
     info: string | undefined
@@ -24,6 +25,9 @@ export class FlightBody extends SolidBody {
     private thrustStrength: number = 10
     private torqueStrength: number = 1
     private yawStrength: number = 2
+
+    private _halfExtents: THREE.Vector3 | null = null;
+    private _bottomLocalY: number | null   = null;
 
     constructor(params: FlightBodyParams) {
         super(params)
@@ -70,6 +74,63 @@ export class FlightBody extends SolidBody {
                 yawStrength: 2,
             };
         }
+    }
+
+    adjustColliderBottom(value: number) {
+        if (!this.body) return;
+        const world = getPhysicsWorld();
+
+        if (this._halfExtents === null) {
+            const bbox = new THREE.Box3().setFromObject(this.plane);
+            const size = bbox.getSize(new THREE.Vector3());
+            this._halfExtents = size.multiplyScalar(0.5);
+
+            const worldCenter = bbox.getCenter(new THREE.Vector3());
+            const localCenter = worldCenter.clone();
+            this.plane.worldToLocal(localCenter);
+
+            this._bottomLocalY = localCenter.y - this._halfExtents.y;
+        }
+
+        this._bottomLocalY! -= value
+
+        const newCenterY = this._bottomLocalY! + this._halfExtents!.y;
+
+        world.removeRigidBody(this.body);
+        this.body = undefined;
+        for (const c of (this as any)._colliders as RAPIER.Collider[]) {
+            world.removeCollider(c, true);
+        }
+        (this as any)._colliders = [];
+
+        const worldPos  = new THREE.Vector3();
+        const worldQuat= new THREE.Quaternion();
+        this.plane.getWorldPosition(worldPos);
+        this.plane.getWorldQuaternion(worldQuat);
+
+        const rbDesc = this.dynamic
+            ? RAPIER.RigidBodyDesc.dynamic().setCcdEnabled(true)
+            : RAPIER.RigidBodyDesc.fixed();
+        rbDesc
+            .setTranslation(worldPos.x, worldPos.y, worldPos.z)
+            .setRotation({x:worldQuat.x, y:worldQuat.y, z:worldQuat.z, w:worldQuat.w})
+            .setLinearDamping(0.1)
+            .setAngularDamping(0.1);
+
+        this.body = world.createRigidBody(rbDesc);
+
+        const cd = RAPIER.ColliderDesc.cuboid(
+            this._halfExtents!.x,
+            this._halfExtents!.y,
+            this._halfExtents!.z
+        )
+            .setTranslation(0, newCenterY, 0)
+            .setFriction(0.7)
+            .setRestitution(0.2)
+            .setDensity(1);
+
+        const newCol = world.createCollider(cd, this.body);
+        (this as any)._colliders.push(newCol);
     }
 
     moveForward() {

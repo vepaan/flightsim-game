@@ -13,12 +13,14 @@ export interface SolidBodyParams {
 
 export class SolidBody {
 
-    private model: THREE.Object3D
-    private dynamic: boolean
+    public model: THREE.Object3D
+    public dynamic: boolean
     private debug: boolean
-    private body: RAPIER.RigidBody | undefined
-    private simpleColliders: RAPIER.ColliderDesc[] = []
-    private complexColliders: RAPIER.Collider[] = []
+    public body: RAPIER.RigidBody | undefined
+    public simpleColliders: RAPIER.ColliderDesc[] = []
+    public complexColliders: RAPIER.Collider[] = []
+
+    private _colliders: RAPIER.Collider[] = []
 
     constructor(params: SolidBodyParams) {
         this.model = params.model
@@ -92,9 +94,10 @@ export class SolidBody {
 
         this.body = world.createRigidBody(bodyDesc)
         
-        this.simpleColliders.forEach(cd => 
-            world.createCollider(cd, this.body)
-        );
+        this.simpleColliders.forEach(cd => {
+            const c = world.createCollider(cd, this.body)
+            this._colliders.push(c)
+        })
     }
 
     private createComplexSolid() {
@@ -217,6 +220,7 @@ export class SolidBody {
 
                             const collider = world.createCollider(colliderDesc, this.body)
                             this.complexColliders.push(collider)
+                            this._colliders.push(collider)
                             
                             if (this.debug) {
                                 this.createConvexHullDebugMesh(vertices)
