@@ -134,24 +134,24 @@ export class PlaneControls {
         this.weaponsBayDown = !this.weaponsBayDown
     }
 
-    private processPitch() {
+    private processPitch(delta: number) {
         const input = this.mouseDelta.dy
 
-        this.planeBody?.processPitch(input)
+        this.planeBody?.processPitch(input, delta)
 
         this.animator?.processLeftElevator(input)
         this.animator?.processRightElevator(input)
         this.mouseDelta.dy = 0
     }
 
-    private processYaw() {
+    private processYaw(delta: number) {
         let rudderDelta = 0
 
         if (this.keysPressed.has('a')) {
-            this.planeBody?.applyYaw(1)
+            this.planeBody?.processYaw(1, delta)
             if (this.animator) rudderDelta = this.animator?.rudder.getDragMax()
         } else if (this.keysPressed.has('d')) {
-            this.planeBody?.applyYaw(-1)
+            this.planeBody?.processYaw(-1, delta)
             if (this.animator) rudderDelta = -this.animator?.rudder.getDragMax()
         } else {
             if (!this.animator) return
@@ -162,9 +162,13 @@ export class PlaneControls {
         this.animator?.processRudder(rudderDelta)
     }
 
-    private processRoll() {
-        this.animator?.processLeftAlieron(this.mouseDelta.dx)
-        this.animator?.processRightAlieron(-this.mouseDelta.dx)
+    private processRoll(delta: number) {
+        const input = this.mouseDelta.dx
+
+        this.planeBody?.processRoll(input, delta)
+
+        this.animator?.processLeftAlieron(input)
+        this.animator?.processRightAlieron(-input)
         this.mouseDelta.dx = 0 // pause if mouse stops moving
     }
 
@@ -177,10 +181,9 @@ export class PlaneControls {
         const deltaPitch = this.mouseDelta.dy * sensitivity
 
         if (!this.planeCamera.isDraggingMouse()) {
-            // normal plane cam
             //this.plane.applyRotation(deltaPitch, 0, deltaRoll)
-            this.processPitch(); 
-            this.processRoll()
+            this.processPitch(delta); 
+            this.processRoll(delta)
         }
 
         if (this.keysPressed.has('w')) this.moveForward()
@@ -188,7 +191,7 @@ export class PlaneControls {
 
 
         // executes for a or d is pressed
-        this.processYaw()
+        this.processYaw(delta)
 
 
         if (this.keysPressed.has('g')) {
@@ -201,7 +204,7 @@ export class PlaneControls {
             this.keysPressed.delete('x')
         }
 
-
+        this.planeBody?.updateAerodynamics(delta)
         this.plane.mixer?.update(delta)
         this.updateCamera()
     }

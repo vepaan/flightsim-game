@@ -13,8 +13,8 @@ import { createGround, initPhysics, stepPhysics } from './physics/PhysicsWorld'
 
 const toneExposure = 0.3
 const IS_DEV_MODE = false
-const WORLD_LENGTH = 2000
-const WORLD_WIDTH = 2000
+const WORLD_LENGTH = 20000
+const WORLD_WIDTH = 20000
 
 const Game: React.FC = () => {
     const mountRef = useRef<HTMLDivElement | null>(null)
