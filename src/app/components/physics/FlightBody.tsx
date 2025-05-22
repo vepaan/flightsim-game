@@ -32,7 +32,10 @@ export class FlightBody extends SolidBody {
 
     private rudderArea: number = 1.2
     private yawCoeff: number = 0.8
+
     private yawDampingCoeff: number = 0.5
+    private rollDampingCoeff: number = 0.5
+    private pitchDampingCoeff: number = 0.5
 
     private airDensity: number = 1.225
 
@@ -54,16 +57,22 @@ export class FlightBody extends SolidBody {
             .then(res => {
                 this.mass = res.mass * factor
                 this.wingArea = res.wingArea * factor
+
                 this.liftCoefficient = res.liftCoefficient
                 this.dragCoefficient = res.dragCoefficient
+
                 this.thrustStrength = res.thrustStrength * factor
                 this.torqueStrength = res.torqueStrength * factor
                 this.yawStrength = res.yawStrength * factor
+
                 this.maxPitch = THREE.MathUtils.degToRad(res.maxPitchDeg)
                 this.maxRoll = THREE.MathUtils.degToRad(res.maxRollDeg)
                 this.rudderArea = res.rudderArea * factor
                 this.yawCoeff = res.yawCoeff
+
                 this.yawDampingCoeff = res.yawDampingCoeff
+                this.rollDampingCoeff = res.rollDampingCoeff
+                this.pitchDampingCoeff = res.pitchDampingCoeff
             })
             .catch(() => {})
             .finally(() => {
@@ -83,7 +92,9 @@ export class FlightBody extends SolidBody {
         maxRollDeg: number,
         rudderArea: number,
         yawCoeff: number,
-        yawDampingCoeff: number
+        yawDampingCoeff: number,
+        rollDampingCoeff: number,
+        pitchDampingCoeff: number
     }> {
         try {
             const res = await fetch(info);
@@ -103,7 +114,9 @@ export class FlightBody extends SolidBody {
                 maxRollDeg: 30,
                 rudderArea: 1.2,
                 yawCoeff: 0.8,
-                yawDampingCoeff: 0.5
+                yawDampingCoeff: 0.5,
+                rollDampingCoeff: 0.5,
+                pitchDampingCoeff: 0.5
             };
         }
     }
@@ -119,34 +132,53 @@ export class FlightBody extends SolidBody {
         const vel = new THREE.Vector3(lv.x, lv.y, lv.z)
         const speed = vel.length()
 
-        if (speed < 0.1) return // neglect at low airspeed
 
-        const vHat = vel.clone().normalize()
-        const q = 0.5 * this.airDensity * speed * speed
+        if (speed >= 0.1) {
+            const vHat = vel.clone().normalize()
+            const q = 0.5 * this.airDensity * speed * speed
 
-        // lift
-        const liftMag = q * this.wingArea * this.liftCoefficient
-        const planeUp = new THREE.Vector3(0,1,0).applyQuaternion(this.plane.quaternion)
-        const liftDir = planeUp.clone()
-                        .sub(vHat.clone().multiplyScalar(planeUp.dot(vHat)))
-                        .normalize()
-        const lift = liftDir.multiplyScalar(liftMag)
+            // lift
+            const liftMag = q * this.wingArea * this.liftCoefficient
+            const planeUp = new THREE.Vector3(0,1,0).applyQuaternion(this.plane.quaternion)
+            const liftDir = planeUp.clone()
+                            .sub(vHat.clone().multiplyScalar(planeUp.dot(vHat)))
+                            .normalize()
+            const lift = liftDir.multiplyScalar(liftMag)
 
-        // drag
-        const dragMag = q * this.wingArea * this.dragCoefficient
-        const drag = vHat.clone().multiplyScalar(-dragMag)
+            // drag
+            const dragMag = q * this.wingArea * this.dragCoefficient
+            const drag = vHat.clone().multiplyScalar(-dragMag)
+
+            // impulses
+            this.applyImpulse(lift.multiplyScalar(delta))
+            this.applyImpulse(drag.multiplyScalar(delta))
+        }
+
 
         // yaw rate damping
         const av = this.body.angvel()
         const yawRate = new THREE.Vector3(av.x, av.y, av.z)
-                        .dot(new THREE.Vector3(0, 1, 0).applyQuaternion(this.plane.quaternion))
-        const dampMoment = -this.yawDampingCoeff * yawRate
-        const upAxis = new THREE.Vector3(0,1,0).applyQuaternion(this.plane.quaternion)
+                        .dot(new THREE.Vector3(0,1,0).applyQuaternion(this.plane.quaternion))
+        const yawDampMoment = -this.yawDampingCoeff * yawRate
+        const yawAxis = new THREE.Vector3(0,1,0).applyQuaternion(this.plane.quaternion)
 
-        // impulses
-        this.applyImpulse(lift.multiplyScalar(delta))
-        this.applyImpulse(drag.multiplyScalar(delta))
-        this.body.applyTorqueImpulse(upAxis.multiplyScalar(dampMoment * delta), true)
+        // roll rate damping
+        const rollRate = new THREE.Vector3(av.x, av.y, av.z)
+                        .dot(new THREE.Vector3(0,0,1).applyQuaternion(this.plane.quaternion))
+        const rollDampMoment = -this.rollDampingCoeff * rollRate
+        const rollAxis = new THREE.Vector3(0,0,1).applyQuaternion(this.plane.quaternion)
+
+        // pitch rate damping
+        const pitchRate = new THREE.Vector3(av.x, av.y, av.z)
+                        .dot(new THREE.Vector3(1,0,0).applyQuaternion(this.plane.quaternion))
+        const pitchDampMoment = -this.pitchDampingCoeff * pitchRate
+        const pitchAxis = new THREE.Vector3(1,0,0).applyQuaternion(this.plane.quaternion)
+
+
+        // damping
+        this.body.applyTorqueImpulse(yawAxis.multiplyScalar(yawDampMoment * delta), true)
+        this.body.applyTorqueImpulse(rollAxis.multiplyScalar(rollDampMoment * delta), true)
+        this.body.applyTorqueImpulse(pitchAxis.multiplyScalar(pitchDampMoment * delta), true)
     }
 
 
@@ -181,6 +213,10 @@ export class FlightBody extends SolidBody {
     processPitch(input: number, delta: number) {
         if (!this.body) return
 
+        const lv = this.body.linvel()
+        const speed = new THREE.Vector3(lv.x, lv.y, lv.z).length()
+        if (speed < 0.5) return
+
         const e = new THREE.Euler().setFromQuaternion(this.plane.quaternion, 'YXZ')
         const cur = e.x
 
@@ -199,6 +235,10 @@ export class FlightBody extends SolidBody {
 
     processRoll(input: number, delta: number) {
         if (!this.body) return
+
+        const lv = this.body.linvel()
+        const speed = new THREE.Vector3(lv.x, lv.y, lv.z).length()
+        if (speed < 0.5) return
 
         const e = new THREE.Euler().setFromQuaternion(this.plane.quaternion, 'ZYX')
         const cur = e.z

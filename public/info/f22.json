@@ -10,5 +10,7 @@
   "maxRollDeg": 45,
   "rudderArea": 1.2,
   "yawCoeff": 0.8,
-  "yawDampingCoeff": 0.5
+  "yawDampingCoeff": 0.5,
+  "rollDampingCoeff": 0.5,
+  "pitchDampingCoeff": 0.5
 }
