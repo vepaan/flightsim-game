@@ -46,7 +46,10 @@ export class FlightBody extends SolidBody {
 
         const scale = new THREE.Vector3()
         this.plane.getWorldScale(scale)
-        const factor = (scale.x * scale.y * scale.z) ** (1/3)
+
+        const volumeFactor = (scale.x * scale.y * scale.z)
+        const lengthFactor = Math.cbrt(volumeFactor)
+        const areaFactor = lengthFactor * lengthFactor
         
         if (!params.info) {
             console.error("Flight info not supplied in FlightBody constructor")
@@ -55,19 +58,20 @@ export class FlightBody extends SolidBody {
 
         this.fetchFlightSpecs(params.info)
             .then(res => {
-                this.mass = res.mass * factor
-                this.wingArea = res.wingArea * factor
+                this.mass = res.mass * volumeFactor
+
+                this.wingArea = res.wingArea * areaFactor
+                this.rudderArea = res.rudderArea * areaFactor
 
                 this.liftCoefficient = res.liftCoefficient
                 this.dragCoefficient = res.dragCoefficient
 
-                this.thrustStrength = res.thrustStrength * factor
-                this.torqueStrength = res.torqueStrength * factor
-                this.yawStrength = res.yawStrength * factor
+                this.thrustStrength = res.thrustStrength * volumeFactor
+                this.torqueStrength = res.torqueStrength * volumeFactor * lengthFactor
+                this.yawStrength = res.yawStrength * volumeFactor * lengthFactor
 
                 this.maxPitch = THREE.MathUtils.degToRad(res.maxPitchDeg)
                 this.maxRoll = THREE.MathUtils.degToRad(res.maxRollDeg)
-                this.rudderArea = res.rudderArea * factor
                 this.yawCoeff = res.yawCoeff
 
                 this.yawDampingCoeff = res.yawDampingCoeff
