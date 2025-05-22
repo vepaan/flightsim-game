@@ -34,7 +34,7 @@ const Game: React.FC = () => {
             50,
             container.clientWidth / container.clientHeight,
             0.1,
-            1000   
+            20000   
         )
         camera.position.set(33.37, 10.81, 66.12)
 

@@ -1,16 +1,15 @@
 {
   "mass": 38000,
-  "wingArea": 80,
+  "wingArea": 78.04,
   "liftCoefficient": 1.338,
   "dragCoefficient": 0.0124,
-  "thrustStrength": 31200,
+  "thrustStrength": 100000,
   "torqueStrength": 54000,
-  "yawStrength": 54000,
   "maxPitchDeg": 20,
-  "maxRollDeg": 45,
-  "rudderArea": 1.2,
+  "maxRollDeg": 20,
+  "rudderArea": 16.54,
   "yawCoeff": 0.8,
-  "yawDampingCoeff": 0.5,
-  "rollDampingCoeff": 0.5,
-  "pitchDampingCoeff": 0.5
+  "yawDampingCoeff": 0.8,
+  "rollDampingCoeff": 0.8,
+  "pitchDampingCoeff": 0.8
 }

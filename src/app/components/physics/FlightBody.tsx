@@ -25,7 +25,6 @@ export class FlightBody extends SolidBody {
 
     private thrustStrength: number = 10
     private torqueStrength: number = 1
-    private yawStrength: number = 2
 
     private maxPitch: number = 20
     private maxRoll: number = 30
@@ -68,7 +67,6 @@ export class FlightBody extends SolidBody {
 
                 this.thrustStrength = res.thrustStrength * volumeFactor
                 this.torqueStrength = res.torqueStrength * volumeFactor * lengthFactor
-                this.yawStrength = res.yawStrength * volumeFactor * lengthFactor
 
                 this.maxPitch = THREE.MathUtils.degToRad(res.maxPitchDeg)
                 this.maxRoll = THREE.MathUtils.degToRad(res.maxRollDeg)
@@ -91,7 +89,6 @@ export class FlightBody extends SolidBody {
         dragCoefficient: number,
         thrustStrength: number,
         torqueStrength: number,
-        yawStrength: number,
         maxPitchDeg: number,
         maxRollDeg: number,
         rudderArea: number,
@@ -113,7 +110,6 @@ export class FlightBody extends SolidBody {
                 dragCoefficient: 0.02,
                 thrustStrength: 10,
                 torqueStrength: 1,
-                yawStrength: 2,
                 maxPitchDeg: 20,
                 maxRollDeg: 30,
                 rudderArea: 1.2,
@@ -158,6 +154,7 @@ export class FlightBody extends SolidBody {
             this.applyImpulse(drag.multiplyScalar(delta))
         }
 
+        console.log(speed)
 
         // yaw rate damping
         const av = this.body.angvel()
